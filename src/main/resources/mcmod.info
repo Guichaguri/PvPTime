@@ -1,0 +1,14 @@
+[
+{
+  "modid": "PvPTime",
+  "name": "PvPTime",
+  "version": "1.0.0",
+  "description": "Lets you choose what in-game hours you want PvP enabled. Perhaps you want to give the players yet another reason to keep indoors during the night?",
+  "url": "",
+  "authorList": [ "Guichaguri" ],
+  "credits": "Erbros, for original idea and for the early Bukkit versions",
+  "requiredMods": [],
+  "dependencies": [],
+  "dependants": []
+}
+]
