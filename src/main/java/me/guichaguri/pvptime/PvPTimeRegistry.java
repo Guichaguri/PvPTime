@@ -1,5 +1,6 @@
 package me.guichaguri.pvptime;
 
+import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 import java.util.HashMap;
@@ -32,9 +33,10 @@ public class PvPTimeRegistry {
     }
 
     public static Boolean isRawPvPTime(int dimension) {
+        if(!worlds.containsKey(dimension)) return null;
         WorldOptions options = worlds.get(dimension);
         if(!options.isEnabled()) return null;
-        long currentTime = DimensionManager.getWorld(dimension).getWorldTime();
+        long currentTime = getDayTime(DimensionManager.getWorld(dimension));
         long startTime = options.getPvPTimeStart();
         long endTime = options.getPvPTimeEnd();
         boolean pt;
@@ -52,6 +54,10 @@ public class PvPTimeRegistry {
 
     public static HashMap<Integer, Boolean> getPvPTimeMap() {
         return pvpTime;
+    }
+
+    public static long getDayTime(World w) {
+        return (w.getWorldTime() % 24000);
     }
 
 }

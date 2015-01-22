@@ -7,7 +7,7 @@ import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.0")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.1")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
@@ -23,18 +23,18 @@ public class PvPTime {
     @Mod.EventHandler
     public void start(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandPvPTime());
-
-        PvPTimeUpdater.register();
     }
 
     @Mod.EventHandler
     public void postStart(FMLServerStartedEvent event) {
         Log.info("Loading PvPTime config...");
         loadConfig();
+
+        PvPTimeUpdater.register();
     }
 
     @Mod.EventHandler
-    public void start(FMLServerStoppingEvent event) {
+    public void stop(FMLServerStoppingEvent event) {
         PvPTimeUpdater.unregister();
     }
 

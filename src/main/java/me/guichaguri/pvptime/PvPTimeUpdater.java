@@ -26,6 +26,10 @@ public class PvPTimeUpdater {
         FMLCommonHandler.instance().bus().register(tick);
         MinecraftForge.EVENT_BUS.register(event);
         update();
+        HashMap<Integer, Boolean> hs = PvPTimeRegistry.getPvPTimeMap();
+        for(int id : DimensionManager.getIDs()) {
+            hs.put(id, PvPTimeRegistry.isRawPvPTime(id));
+        }
     }
     public static void unregister() {
         if(tick != null) FMLCommonHandler.instance().bus().unregister(tick);
@@ -47,7 +51,7 @@ public class PvPTimeUpdater {
     public static class PvPTimeEventListener {
         @SubscribeEvent
         public void CommandEvent(CommandEvent event) {
-            ticksLeft = 0;
+            ticksLeft = 5;
         }
 
         @SubscribeEvent
@@ -68,7 +72,7 @@ public class PvPTimeUpdater {
             WorldOptions options = o.get(id);
             if(!options.isEnabled()) continue;
             World w = DimensionManager.getWorld(id);
-            long time = w.getWorldTime();
+            long time = PvPTimeRegistry.getDayTime(w);
             long start = options.getPvPTimeStart();
             long end = options.getPvPTimeEnd();
 
@@ -83,20 +87,31 @@ public class PvPTimeUpdater {
                 pt.put(id, is);
             }
 
-            long startLeft = start - time;
-            long endLeft = end - time;
-            long i2 = 10000;
-            if((startLeft < endLeft) && (startLeft >= 0)) {
-                i2 = startLeft;
-            } else if(endLeft >= 0) {
-                i2 = endLeft;
+            /* Calc ticks left to check time again */
+
+            long timeLeft = 10000;
+
+            if(is) {
+                if (time > end) {
+                    timeLeft = w.getTotalWorldTime() - time + end;
+                } else {
+                    timeLeft = end - time;
+                }
+            } else {
+                if(time > start) {
+                    timeLeft = w.getTotalWorldTime() - time + start;
+                } else {
+                    timeLeft = start - time;
+                }
             }
-            if(i2 < i) i = i2;
+
+            if(timeLeft < i) i = timeLeft;
         }
         ticksLeft = i;
     }
 
     private static void announce(World w, String msg) {
+        if((msg == null) || (msg.isEmpty())) return;
         for(EntityPlayer p : (List<EntityPlayer>)w.playerEntities) {
             p.addChatMessage(new ChatComponentText(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1")));
         }
