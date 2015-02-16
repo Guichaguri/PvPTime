@@ -1,8 +1,5 @@
 package me.guichaguri.pvptime;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
@@ -10,6 +7,9 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class PvPTimeUpdater {
 
     public static class PvPTimeTickUpdater {
         @SubscribeEvent
-        public void ServerTickEvent(ServerTickEvent event) {
+        public void ServerTickEvent(TickEvent.ServerTickEvent event) {
             ticksLeft--;
             if (ticksLeft < 0) {
                 update();
@@ -58,7 +58,7 @@ public class PvPTimeUpdater {
         public void AttackEntityEvent(AttackEntityEvent event) {
             if (!(event.target instanceof EntityPlayer)) return;
             World w = event.entityPlayer.getEntityWorld();
-            if (!PvPTimeRegistry.isPvPTime(w.provider.dimensionId))
+            if (!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId()))
                 event.setCanceled(true);
         }
     }

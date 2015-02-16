@@ -1,13 +1,16 @@
 package me.guichaguri.pvptime;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.*;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.1")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.2")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")

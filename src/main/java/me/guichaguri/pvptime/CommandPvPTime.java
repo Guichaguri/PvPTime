@@ -24,7 +24,7 @@ public class CommandPvPTime extends CommandBase {
             World w = DimensionManager.getWorld(id);
             String n = w.provider.getDimensionName() + " (" + id + ")";
             Boolean pvptime = PvPTimeRegistry.isPvPTime(id);
-            String on = pvptime == null ? "§cDisabled" : ((pvptime ? "PvP On" : "PvP Off") + " (" + (w.getWorldTime() % 24000) + " - " + w.getTotalWorldTime() + ")");
+            String on = pvptime == null ? "§cDisabled" : (pvptime ? "PvP On" : "PvP Off");
             sender.addChatMessage(new ChatComponentText("§6" + n + "§e: " + on));
         }
         sender.addChatMessage(new ChatComponentText("§a--------------------------------"));
