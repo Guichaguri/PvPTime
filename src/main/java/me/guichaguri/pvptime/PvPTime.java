@@ -10,13 +10,16 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.2")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.2b", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
     public static PvPTime instance;
 
     private File configFile;
+
+    //public boolean onlyMultiplayer = true;
+    //public boolean atLeastTwoPlayers = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -45,6 +48,13 @@ public class PvPTime {
     public void loadConfig() {
         Configuration config = new Configuration(configFile);
         config.load();
+
+        // COMMING SOON
+        /*config.setCategoryComment("General", "General options, applied for all dimensions\n" +
+                            "\nonlyMultiplayer: Messages will broadcast when is a server or lan" +
+                            "\natLeastTwoPlayers: Messages will broadcast if there's at least two players online");
+        onlyMultiplayer = config.get("General", "onlyMultiplayer", true).getBoolean();
+        atLeastTwoPlayers = config.get("General", "atLeastTwoPlayers", false).getBoolean();*/
 
         for(int id : DimensionManager.getIDs()) {
             String cat = "dimension_" + id;

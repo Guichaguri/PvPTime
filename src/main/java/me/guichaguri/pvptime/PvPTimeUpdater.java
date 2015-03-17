@@ -1,5 +1,7 @@
 package me.guichaguri.pvptime;
 
+import java.util.HashMap;
+import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
@@ -10,9 +12,6 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-
-import java.util.HashMap;
-import java.util.List;
 
 public class PvPTimeUpdater {
     private static long ticksLeft = 100;
