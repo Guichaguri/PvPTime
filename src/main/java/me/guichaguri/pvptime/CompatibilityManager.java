@@ -39,7 +39,7 @@ public class CompatibilityManager {
         if(!(world instanceof org.bukkit.World)) return false;
         org.bukkit.World w = (org.bukkit.World)world;
         int id = mcWorld.provider.getDimensionId();
-        String cat = w.getName() + "_" + id;
+        String cat = w.getName();
         config.setCategoryComment(cat, "Options for dimension " + id + " - " + w.getName());
         boolean enabled = config.get(cat, "enabled", w.getEnvironment() == Environment.NORMAL).getBoolean();
         long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
@@ -59,7 +59,7 @@ public class CompatibilityManager {
         if(!(world instanceof org.spongepowered.api.world.World)) return false;
         org.spongepowered.api.world.World w = (org.spongepowered.api.world.World)world;
         int id = mcWorld.provider.getDimensionId();
-        String cat = w.getName() + "_" + id;
+        String cat = w.getName();
         config.setCategoryComment(cat, "Options for dimension " + id + " - " + w.getName());
         boolean enabled = config.get(cat, "enabled", w.getDimension().getType() == DimensionTypes.OVERWORLD).getBoolean();
         long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
