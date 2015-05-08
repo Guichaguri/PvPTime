@@ -3,12 +3,15 @@ package me.guichaguri.pvptime;
 import java.util.HashMap;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -50,7 +53,7 @@ public class PvPTimeUpdater {
     public static class PvPTimeEventListener {
         @SubscribeEvent
         public void CommandEvent(CommandEvent event) {
-            ticksLeft = 5;
+            ticksLeft = 2;
         }
 
         @SubscribeEvent
@@ -59,6 +62,15 @@ public class PvPTimeUpdater {
             World w = event.entityPlayer.getEntityWorld();
             if (!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId()))
                 event.setCanceled(true);
+        }
+
+        @SubscribeEvent
+        public void WorldLoad(WorldEvent.Load event) {
+            int id = event.world.provider.getDimensionId();
+            WorldOptions options = PvPTimeRegistry.getWorldOptions(id);
+            if(options == null) {
+                PvPTime.INSTANCE.loadConfig(); // Lets reload the config
+            }
         }
     }
 
@@ -111,6 +123,18 @@ public class PvPTimeUpdater {
 
     private static void announce(World w, String msg) {
         if((msg == null) || (msg.isEmpty())) return;
+        if(PvPTime.INSTANCE.atLeastTwoPlayers) {
+            MinecraftServer server = MinecraftServer.getServer();
+            if(server == null) return; // Its not even a server
+            if(server.getConfigurationManager().playerEntityList.size() < 2) return;
+        } else if(PvPTime.INSTANCE.onlyMultiplayer) {
+            MinecraftServer server = MinecraftServer.getServer();
+            if(server == null) return;
+            if(server.isSinglePlayer()) {
+                IntegratedServer intServer = (IntegratedServer)server;
+                if(!intServer.getPublic()) return;
+            }
+        }
         for(EntityPlayer p : (List<EntityPlayer>)w.playerEntities) {
             p.addChatMessage(new ChatComponentText(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1")));
         }

@@ -3,6 +3,7 @@ package me.guichaguri.pvptime;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
@@ -19,14 +20,34 @@ public class CommandPvPTime extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        sender.addChatMessage(new ChatComponentText("§a---------- PvPTime Info ----------"));
+
+        if((args.length > 0) && (args[0].equalsIgnoreCase("reload"))) {
+            PvPTime.INSTANCE.loadConfig();
+            ChatComponentText txt = new ChatComponentText("Config Reloaded");
+            txt.setChatStyle(txt.getChatStyle().setColor(EnumChatFormatting.GREEN));
+            sender.addChatMessage(txt);
+        }
+
+        ChatComponentText title = new ChatComponentText("---------- PvPTime Info ----------");
+        title.getChatStyle().setColor(EnumChatFormatting.GREEN);
+
+        sender.addChatMessage(title);
         for(int id : DimensionManager.getIDs()) {
             World w = DimensionManager.getWorld(id);
             String n = w.provider.getDimensionName() + " (" + id + ")";
             Boolean pvptime = PvPTimeRegistry.isPvPTime(id);
             String on = pvptime == null ? "§cDisabled" : (pvptime ? "PvP On" : "PvP Off");
-            sender.addChatMessage(new ChatComponentText("§6" + n + "§e: " + on));
+            ChatComponentText txt = new ChatComponentText("");
+            txt.getChatStyle().setColor(EnumChatFormatting.YELLOW);
+            ChatComponentText name = new ChatComponentText(n);
+            name.getChatStyle().setColor(EnumChatFormatting.GOLD);
+            txt.appendSibling(name);
+            txt.appendText(": " + on);
+            sender.addChatMessage(txt);
         }
-        sender.addChatMessage(new ChatComponentText("§a--------------------------------"));
+
+        ChatComponentText footer = new ChatComponentText("--------------------------------");
+        footer.getChatStyle().setColor(EnumChatFormatting.GREEN);
+        sender.addChatMessage(footer);
     }
 }

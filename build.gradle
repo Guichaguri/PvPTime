@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.0.2b"
+version = "1.0.3"
 group= "me.guichaguri.pvptime" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "PvPTime"
 
@@ -25,6 +25,7 @@ minecraft {
     version = "1.8-11.14.0.1290-1.8"
     runDir = "eclipse"
 }
+
 
 dependencies {
     // you may put jars on which you depend on in ./libs
