@@ -26,6 +26,7 @@ public class CommandPvPTime extends CommandBase {
             ChatComponentText txt = new ChatComponentText("Config Reloaded");
             txt.setChatStyle(txt.getChatStyle().setColor(EnumChatFormatting.GREEN));
             sender.addChatMessage(txt);
+            return;
         }
 
         ChatComponentText title = new ChatComponentText("---------- PvPTime Info ----------");

@@ -40,14 +40,9 @@ public class CompatibilityManager {
         org.bukkit.World w = (org.bukkit.World)world;
         int id = mcWorld.provider.getDimensionId();
         String cat = w.getName();
-        config.setCategoryComment(cat, "Options for dimension " + id + " - " + w.getName());
-        boolean enabled = config.get(cat, "enabled", w.getEnvironment() == Environment.NORMAL).getBoolean();
-        long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
-        long end = config.get(cat, "endTime", 500, "Time in ticks that the PvP will be disabled").getInt();
-        String startMsg = config.get(cat, "startMessage", "&cIt's night and PvP is turned on").getString();
-        String endMsg = config.get(cat, "endMessage", "&aIt's daytime and PvP is turned off").getString();
-        WorldOptions options = new WorldOptions(enabled, start, end, startMsg, endMsg);
-        PvPTimeRegistry.setWorldOptions(id, options);
+        boolean isOverworld = w.getEnvironment() == Environment.NORMAL;
+
+        PvPTime.INSTANCE.loadConfig(config, cat, id, cat, isOverworld);
         return true;
     }
 
@@ -60,14 +55,9 @@ public class CompatibilityManager {
         org.spongepowered.api.world.World w = (org.spongepowered.api.world.World)world;
         int id = mcWorld.provider.getDimensionId();
         String cat = w.getName();
-        config.setCategoryComment(cat, "Options for dimension " + id + " - " + w.getName());
-        boolean enabled = config.get(cat, "enabled", w.getDimension().getType() == DimensionTypes.OVERWORLD).getBoolean();
-        long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
-        long end = config.get(cat, "endTime", 500, "Time in ticks that the PvP will be disabled").getInt();
-        String startMsg = config.get(cat, "startMessage", "&cIt's night and PvP is turned on").getString();
-        String endMsg = config.get(cat, "endMessage", "&aIt's daytime and PvP is turned off").getString();
-        WorldOptions options = new WorldOptions(enabled, start, end, startMsg, endMsg);
-        PvPTimeRegistry.setWorldOptions(id, options);
+        boolean isOverworld = w.getDimension().getType() == DimensionTypes.OVERWORLD;
+
+        PvPTime.INSTANCE.loadConfig(config, cat, id, cat, isOverworld);
         return true;
     }
 

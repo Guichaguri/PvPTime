@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.3", acceptableRemoteVersions = "*")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.4", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
@@ -76,15 +76,26 @@ public class PvPTime {
             }
         }
 
-        String cat = "dimension_" + id;
+        loadConfig(config, "dimension_" + id, id, w != null ? w.provider.getDimensionName() : null, id == 0);
+    }
+
+    protected void loadConfig(Configuration config, String cat, int id, String dimName, boolean isOverworld) {
         config.setCategoryComment(cat, "Options for dimension " + id +
-                w == null ? "" : (" - " + w.provider.getDimensionName()));
-        boolean enabled = config.get(cat, "enabled", id == 0).getBoolean();
+                (dimName != null ? (" - " + dimName) : ""));
+
+        boolean enabled = config.get(cat, "enabled", isOverworld, "If PvPTime will be disabled on this dimension").getBoolean();
         long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
         long end = config.get(cat, "endTime", 500, "Time in ticks that the PvP will be disabled").getInt();
-        String startMsg = config.get(cat, "startMessage", "&cIt's night and PvP is turned on").getString();
-        String endMsg = config.get(cat, "endMessage", "&aIt's daytime and PvP is turned off").getString();
-        WorldOptions options = new WorldOptions(enabled, start, end, startMsg, endMsg);
+        String startMsg = config.get(cat, "startMessage", "&cIt's night and PvP is turned on",
+                "Message to be broadcasted when the PvP Time starts").getString();
+        String endMsg = config.get(cat, "endMessage", "&aIt's daytime and PvP is turned off",
+                "Message to be broadcasted when the PvP Time ends").getString();
+        String[] startCmds = config.get(cat, "startCmds", new String[0],
+                "Commands to be executed when the PvPTime starts").getStringList();
+        String[] endCmds = config.get(cat, "endCmds", new String[0],
+                "Commands to be executed when the PvPTime ends").getStringList();
+        WorldOptions options = new WorldOptions(enabled, start, end, startMsg, endMsg, startCmds, endCmds);
         PvPTimeRegistry.setWorldOptions(id, options);
     }
+
 }

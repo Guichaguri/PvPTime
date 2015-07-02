@@ -2,7 +2,7 @@
 {
   "modid": "PvPTime",
   "name": "PvPTime",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Lets you choose what in-game hours you want PvP enabled. Perhaps you want to give the players yet another reason to keep indoors during the night?",
   "url": "http://minecraft.curseforge.com/mc-mods/227151-pvptime",
   "authorList": [ "Guichaguri" ],

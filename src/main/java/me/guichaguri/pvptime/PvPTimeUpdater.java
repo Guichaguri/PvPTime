@@ -2,6 +2,8 @@ package me.guichaguri.pvptime;
 
 import java.util.HashMap;
 import java.util.List;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -10,6 +12,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -58,10 +61,27 @@ public class PvPTimeUpdater {
 
         @SubscribeEvent
         public void AttackEntityEvent(AttackEntityEvent event) {
-            if (!(event.target instanceof EntityPlayer)) return;
+            if(event.isCanceled()) return;
+            if(!(event.target instanceof EntityPlayer)) return;
             World w = event.entityPlayer.getEntityWorld();
-            if (!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId()))
+            if(!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId())) {
                 event.setCanceled(true);
+            }
+        }
+
+        @SubscribeEvent
+        public void LivingAttackEvent(LivingAttackEvent event) {
+            if(event.isCanceled()) return;
+            if(!(event.entity instanceof EntityPlayer)) return;
+            if(event.source == null) return;
+            Entity damager = event.source.getEntity();
+            if(damager == null) return;
+            if(damager instanceof EntityPlayer) {
+                World w = damager.getEntityWorld();
+                if(!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId())) {
+                    event.setCanceled(true);
+                }
+            }
         }
 
         @SubscribeEvent
@@ -91,7 +111,8 @@ public class PvPTimeUpdater {
             Boolean is = PvPTimeRegistry.isRawPvPTime(id);
             if(was != null) {
                 if(is != was) {
-                    announce(w, is ? options.getStartMessage() : options.getEndMessage());
+                    announce(w, is ? options.getStartMessage() : options.getEndMessage(),
+                                is ? options.getStartCmds() : options.getEndCmds());
                     pt.put(id, is);
                 }
             } else {
@@ -121,7 +142,15 @@ public class PvPTimeUpdater {
         ticksLeft = i;
     }
 
-    private static void announce(World w, String msg) {
+    private static void announce(World w, String msg, String[] cmds) {
+        if((cmds != null) && (cmds.length > 0)) {
+            MinecraftServer server = MinecraftServer.getServer();
+            if(server == null) return;
+            ICommandManager manager = server.getCommandManager();
+            for(String cmd : cmds) {
+                manager.executeCommand(server, cmd);
+            }
+        }
         if((msg == null) || (msg.isEmpty())) return;
         if(PvPTime.INSTANCE.atLeastTwoPlayers) {
             MinecraftServer server = MinecraftServer.getServer();

@@ -1,9 +1,8 @@
 package me.guichaguri.pvptime;
 
+import java.util.HashMap;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
-
-import java.util.HashMap;
 
 public class PvPTimeRegistry {
 
