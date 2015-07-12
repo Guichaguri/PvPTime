@@ -15,7 +15,7 @@ public class CommandPvPTime extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/pvptime";
+        return "/pvptime [reload]";
     }
 
     @Override
@@ -23,9 +23,11 @@ public class CommandPvPTime extends CommandBase {
 
         if((args.length > 0) && (args[0].equalsIgnoreCase("reload"))) {
             PvPTime.INSTANCE.loadConfig();
-            ChatComponentText txt = new ChatComponentText("Config Reloaded");
+            
+            ChatComponentText txt = new ChatComponentText("Config Reloaded!");
             txt.setChatStyle(txt.getChatStyle().setColor(EnumChatFormatting.GREEN));
             sender.addChatMessage(txt);
+            
             return;
         }
 
