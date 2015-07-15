@@ -2,21 +2,23 @@ package me.guichaguri.pvptime;
 
 public class WorldOptions {
     private boolean enabled = true;
-    private long pvptimeStart = 13000;
-    private long pvptimeEnd = 500;
+    private int totalDayTime = 24000;
+    private int pvptimeStart = 13000;
+    private int pvptimeEnd = 500;
     private String startMessage = "&cIt's night and PvP is turned on";
     private String endMessage = "&aIt's daytime and PvP is turned off";
     private String[] startCmds = new String[0];
     private String[] endCmds = new String[0];
 
-    public WorldOptions(boolean enabled, long pvptimeStart, long pvptimeEnd, String startMessage, String endMessage,
-                        String[] startCmds, String[] endCmds) {
+    public WorldOptions(boolean enabled, int totalDayTime, int pvptimeStart, int pvptimeEnd,
+                        String startMessage, String endMessage, String[] startCmds, String[] endCmds) {
         this(enabled, pvptimeStart, pvptimeEnd, startMessage, endMessage);
+        this.totalDayTime = totalDayTime;
         this.startCmds = startCmds;
         this.endCmds = endCmds;
     }
 
-    public WorldOptions(boolean enabled, long pvptimeStart, long pvptimeEnd, String startMessage, String endMessage) {
+    public WorldOptions(boolean enabled, int pvptimeStart, int pvptimeEnd, String startMessage, String endMessage) {
         this.enabled = enabled;
         this.pvptimeStart = pvptimeStart;
         this.pvptimeEnd = pvptimeEnd;
@@ -24,7 +26,7 @@ public class WorldOptions {
         this.endMessage = endMessage;
     }
 
-    public WorldOptions(long pvptimeStart, long pvptimeEnd) {
+    public WorldOptions(int pvptimeStart, int pvptimeEnd) {
         this.enabled = true;
         this.pvptimeStart = pvptimeStart;
         this.pvptimeEnd = pvptimeEnd;
@@ -42,19 +44,19 @@ public class WorldOptions {
         this.enabled = enabled;
     }
 
-    public long getPvPTimeStart() {
+    public int getPvPTimeStart() {
         return pvptimeStart;
     }
 
-    public void setPvPTimeStart(long pvptimeStart) {
+    public void setPvPTimeStart(int pvptimeStart) {
         this.pvptimeStart = pvptimeStart;
     }
 
-    public long getPvPTimeEnd() {
+    public int getPvPTimeEnd() {
         return pvptimeEnd;
     }
 
-    public void setPvPTimeEnd(long pvptimeEnd) {
+    public void setPvPTimeEnd(int pvptimeEnd) {
         this.pvptimeEnd = pvptimeEnd;
     }
 
@@ -88,5 +90,13 @@ public class WorldOptions {
 
     public void setEndCmds(String[] endCmds) {
         this.endCmds = endCmds;
+    }
+
+    public int getTotalDayTime() {
+        return totalDayTime;
+    }
+
+    public void setTotalDayTime(int totalDayTime) {
+        this.totalDayTime = totalDayTime;
     }
 }

@@ -35,7 +35,7 @@ public class PvPTimeRegistry {
         if(!worlds.containsKey(dimension)) return null;
         WorldOptions options = worlds.get(dimension);
         if(!options.isEnabled()) return null;
-        long currentTime = getDayTime(DimensionManager.getWorld(dimension));
+        long currentTime = getDayTime(options, DimensionManager.getWorld(dimension));
         long startTime = options.getPvPTimeStart();
         long endTime = options.getPvPTimeEnd();
         boolean pt;
@@ -55,8 +55,8 @@ public class PvPTimeRegistry {
         return pvpTime;
     }
 
-    public static long getDayTime(World w) {
-        return (w.getWorldTime() % 24000);
+    public static long getDayTime(WorldOptions options, World w) {
+        return (w.getWorldTime() % options.getTotalDayTime());
     }
 
 }

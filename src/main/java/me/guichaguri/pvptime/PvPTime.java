@@ -1,7 +1,9 @@
 package me.guichaguri.pvptime;
 
+import me.guichaguri.pvptime.api.PvPTimeEvent.PvPTimeWorldSetupEvent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -11,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.4", acceptableRemoteVersions = "*")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.5", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
@@ -80,22 +82,27 @@ public class PvPTime {
     }
 
     protected void loadConfig(Configuration config, String cat, int id, String dimName, boolean isOverworld) {
+        PvPTimeWorldSetupEvent setup = new PvPTimeWorldSetupEvent(id, isOverworld);
+        MinecraftForge.EVENT_BUS.post(setup);
+
         config.setCategoryComment(cat, "Options for dimension " + id +
                 (dimName != null ? (" - " + dimName) : ""));
 
-        boolean enabled = config.get(cat, "enabled", isOverworld, "If PvPTime will be disabled on this dimension").getBoolean();
-        long start = config.get(cat, "startTime", 13000, "Time in ticks that the PvP will be enabled").getInt();
-        long end = config.get(cat, "endTime", 500, "Time in ticks that the PvP will be disabled").getInt();
-        String startMsg = config.get(cat, "startMessage", "&cIt's night and PvP is turned on",
-                "Message to be broadcasted when the PvP Time starts").getString();
-        String endMsg = config.get(cat, "endMessage", "&aIt's daytime and PvP is turned off",
-                "Message to be broadcasted when the PvP Time ends").getString();
-        String[] startCmds = config.get(cat, "startCmds", new String[0],
-                "Commands to be executed when the PvPTime starts").getStringList();
-        String[] endCmds = config.get(cat, "endCmds", new String[0],
-                "Commands to be executed when the PvPTime ends").getStringList();
-        WorldOptions options = new WorldOptions(enabled, start, end, startMsg, endMsg, startCmds, endCmds);
-        PvPTimeRegistry.setWorldOptions(id, options);
+        WorldOptions o = setup.defaultOptions;
+        if(o == null) {
+            o = new WorldOptions(isOverworld);
+        }
+
+        o.setEnabled(config.get(cat, "enabled", o.isEnabled(), "If PvPTime will be disabled on this dimension").getBoolean());
+        o.setTotalDayTime(config.get(cat, "totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has").getInt());
+        o.setPvPTimeStart(config.get(cat, "startTime", o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled").getInt());
+        o.setPvPTimeEnd(config.get(cat, "endTime", o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled").getInt());
+        o.setStartMessage(config.get(cat, "startMessage", o.getStartMessage(), "Message to be broadcasted when the PvP Time starts").getString());
+        o.setEndMessage(config.get(cat, "endMessage", o.getEndMessage(), "Message to be broadcasted when the PvP Time ends").getString());
+        o.setStartCmds(config.get(cat, "startCmds", o.getStartCmds(), "Commands to be executed when the PvPTime starts").getStringList());
+        o.setEndCmds(config.get(cat, "endCmds", o.getEndCmds(), "Commands to be executed when the PvPTime ends").getStringList());
+
+        PvPTimeRegistry.setWorldOptions(id, o);
     }
 
 }
