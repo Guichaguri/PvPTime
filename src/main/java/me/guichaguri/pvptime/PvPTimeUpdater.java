@@ -66,7 +66,8 @@ public class PvPTimeUpdater {
             if(event.target.getEntityId() == event.entityPlayer.getEntityId()) return;
             if(!(event.target instanceof EntityPlayer)) return;
             World w = event.entityPlayer.getEntityWorld();
-            if(!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId())) {
+            Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimensionId());
+            if(isPvPTime != null && !isPvPTime) {
                 event.setCanceled(true);
             }
         }
@@ -76,12 +77,15 @@ public class PvPTimeUpdater {
             if(event.isCanceled()) return;
             if(event.source == null) return;
             Entity damager = event.source.getEntity();
+            Entity defender = event.entity;
             if(damager == null) return;
-            if(event.entity.getEntityId() == damager.getEntityId()) return;
-            if(!(event.entity instanceof EntityPlayer)) return;
+            if(defender == null) return;
+            if(defender.getEntityId() == damager.getEntityId()) return;
+            if(!(defender instanceof EntityPlayer)) return;
             if(damager instanceof EntityPlayer) {
                 World w = damager.worldObj;
-                if(!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId())) {
+                Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimensionId());
+                if(isPvPTime != null && !isPvPTime) {
                     event.setCanceled(true);
                 }
             }
