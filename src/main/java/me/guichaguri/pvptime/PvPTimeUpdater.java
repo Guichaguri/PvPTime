@@ -76,9 +76,11 @@ public class PvPTimeUpdater {
             if(event.isCanceled()) return;
             if(event.source == null) return;
             Entity damager = event.source.getEntity();
+            Entity defender = event.entity;
             if(damager == null) return;
-            if(event.entity.getEntityId() == damager.getEntityId()) return;
-            if(!(event.entity instanceof EntityPlayer)) return;
+            if(defender == null) return;
+            if(defender.getEntityId() == damager.getEntityId()) return;
+            if(!(defender instanceof EntityPlayer)) return;
             if(damager instanceof EntityPlayer) {
                 World w = damager.worldObj;
                 if(!PvPTimeRegistry.isPvPTime(w.provider.getDimensionId())) {
