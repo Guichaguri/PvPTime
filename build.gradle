@@ -1,29 +1,28 @@
+
+// For those who want the bleeding edge
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
+apply plugin: 'net.minecraftforge.gradle.forge'
 
-apply plugin: 'forge'
-
-version = "1.0.5"
+version = "1.0.6"
 group= "me.guichaguri.pvptime" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "PvPTime"
 
 minecraft {
-    version = "1.8-11.14.0.1290-1.8"
+    version = "1.8.8-11.15.0.1634-1.8.8"
     runDir = "eclipse"
+
+    mappings = "snapshot_20151122"
 }
 
 
