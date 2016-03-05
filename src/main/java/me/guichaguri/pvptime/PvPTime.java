@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.6", acceptableRemoteVersions = "*")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.7", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
@@ -91,9 +91,11 @@ public class PvPTime {
         WorldOptions o = setup.defaultOptions;
         if(o == null) {
             o = new WorldOptions(isOverworld);
+            o.setEngineMode(isOverworld ? 1 : 2);
         }
 
         o.setEnabled(config.get(cat, "enabled", o.isEnabled(), "If PvPTime will be disabled on this dimension").getBoolean());
+        o.setEngineMode(config.get(cat, "engineMode", o.getEngineMode(), "1: Configurable Time - 2: Automatic").getInt());
         o.setTotalDayTime(config.get(cat, "totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has").getInt());
         o.setPvPTimeStart(config.get(cat, "startTime", o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled").getInt());
         o.setPvPTimeEnd(config.get(cat, "endTime", o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled").getInt());

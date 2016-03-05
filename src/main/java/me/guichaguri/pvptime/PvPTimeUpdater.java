@@ -16,7 +16,6 @@ import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -29,7 +28,7 @@ public class PvPTimeUpdater {
         unregister();
         tick = new PvPTimeTickUpdater();
         event = new PvPTimeEventListener();
-        FMLCommonHandler.instance().bus().register(tick);
+        MinecraftForge.EVENT_BUS.register(tick);
         MinecraftForge.EVENT_BUS.register(event);
         update();
         HashMap<Integer, Boolean> hs = PvPTimeRegistry.getPvPTimeMap();
@@ -38,7 +37,7 @@ public class PvPTimeUpdater {
         }
     }
     public static void unregister() {
-        if(tick != null) FMLCommonHandler.instance().bus().unregister(tick);
+        if(tick != null) MinecraftForge.EVENT_BUS.unregister(tick);
         if(event != null) MinecraftForge.EVENT_BUS.unregister(event);
         tick = null;
         event = null;
@@ -101,6 +100,7 @@ public class PvPTimeUpdater {
         }
     }
 
+
     private static void update() {
         long i = 10000;
         HashMap<Integer, WorldOptions> o = PvPTimeRegistry.getWorldOptionMap();
@@ -110,9 +110,8 @@ public class PvPTimeUpdater {
             WorldOptions options = o.get(id);
             if(!options.isEnabled()) continue;
             World w = DimensionManager.getWorld(id);
-            long time = PvPTimeRegistry.getDayTime(options, w);
-            long start = options.getPvPTimeStart();
-            long end = options.getPvPTimeEnd();
+            if(w == null) continue;
+            int engineMode = options.getEngineMode();
 
             Boolean was = pt.containsKey(id) ? pt.get(id) : null;
             Boolean is = PvPTimeRegistry.isRawPvPTime(id);
@@ -133,23 +132,35 @@ public class PvPTimeUpdater {
 
             /* Calc ticks left to check time again */
 
-            long timeLeft = 10000;
+            if(engineMode == 1) {
 
-            if(is) {
-                if (time > end) {
-                    timeLeft = w.getTotalWorldTime() - time + end;
+                long time = PvPTimeRegistry.getDayTime(options, w);
+                long start = options.getPvPTimeStart();
+                long end = options.getPvPTimeEnd();
+
+                long timeLeft;
+
+                if(is) {
+                    if(time > end) {
+                        timeLeft = w.getTotalWorldTime() - time + end;
+                    } else {
+                        timeLeft = end - time;
+                    }
                 } else {
-                    timeLeft = end - time;
+                    if(time > start) {
+                        timeLeft = w.getTotalWorldTime() - time + start;
+                    } else {
+                        timeLeft = start - time;
+                    }
                 }
-            } else {
-                if(time > start) {
-                    timeLeft = w.getTotalWorldTime() - time + start;
-                } else {
-                    timeLeft = start - time;
-                }
+
+                if(timeLeft < i) i = timeLeft;
+
+            } else if(engineMode == 2) {
+
+                i = 20;
+
             }
-
-            if(timeLeft < i) i = timeLeft;
         }
         ticksLeft = i;
     }

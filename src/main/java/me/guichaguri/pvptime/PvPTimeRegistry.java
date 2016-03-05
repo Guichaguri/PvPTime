@@ -35,12 +35,35 @@ public class PvPTimeRegistry {
         if(!worlds.containsKey(dimension)) return null;
         WorldOptions options = worlds.get(dimension);
         if(!options.isEnabled()) return null;
-        long currentTime = getDayTime(options, DimensionManager.getWorld(dimension));
+        World w = DimensionManager.getWorld(dimension);
+        if(w == null) return null;
+        switch(options.getEngineMode()) {
+            case 1:
+                return isRawPvPTime1(options, w);
+            case 2:
+                return isRawPvPTime2(options, w);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Engine Mode 2
+     */
+    public static Boolean isRawPvPTime2(WorldOptions options, World w) {
+        return !w.isDaytime();
+    }
+
+    /**
+     * Engine Mode 1
+     */
+    public static Boolean isRawPvPTime1(WorldOptions options, World w) {
+        long currentTime = getDayTime(options, w);
         long startTime = options.getPvPTimeStart();
         long endTime = options.getPvPTimeEnd();
         boolean pt;
         if(startTime < endTime) {
-            pt = ( currentTime > startTime && currentTime < endTime);
+            pt = (currentTime > startTime && currentTime < endTime);
         } else {
             pt = (currentTime > startTime || currentTime < endTime);
         }
