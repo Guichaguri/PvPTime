@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.7", acceptableRemoteVersions = "*")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.8", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
@@ -78,7 +78,7 @@ public class PvPTime {
             }
         }
 
-        loadConfig(config, "dimension_" + id, id, w != null ? w.provider.getDimensionName() : null, id == 0);
+        loadConfig(config, "dimension_" + id, id, w != null ? w.provider.getDimensionType().getName() : null, id == 0);
     }
 
     protected void loadConfig(Configuration config, String cat, int id, String dimName, boolean isOverworld) {

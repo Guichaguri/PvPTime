@@ -1,15 +1,15 @@
 package me.guichaguri.pvptime;
 
 import java.util.HashMap;
-import java.util.List;
 import me.guichaguri.pvptime.api.PvPTimeEvent.PvPTimeUpdateEvent;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
@@ -65,7 +65,7 @@ public class PvPTimeUpdater {
             if(event.target.getEntityId() == event.entityPlayer.getEntityId()) return;
             if(!(event.target instanceof EntityPlayer)) return;
             World w = event.entityPlayer.getEntityWorld();
-            Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimensionId());
+            Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimension());
             if(isPvPTime != null && !isPvPTime) {
                 event.setCanceled(true);
             }
@@ -83,7 +83,7 @@ public class PvPTimeUpdater {
             if(!(defender instanceof EntityPlayer)) return;
             if(damager instanceof EntityPlayer) {
                 World w = damager.worldObj;
-                Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimensionId());
+                Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimension());
                 if(isPvPTime != null && !isPvPTime) {
                     event.setCanceled(true);
                 }
@@ -92,7 +92,7 @@ public class PvPTimeUpdater {
 
         @SubscribeEvent
         public void WorldLoad(WorldEvent.Load event) {
-            int id = event.world.provider.getDimensionId();
+            int id = event.world.provider.getDimension();
             WorldOptions options = PvPTimeRegistry.getWorldOptions(id);
             if(options == null) {
                 PvPTime.INSTANCE.loadConfig(); // Lets reload the config
@@ -166,29 +166,29 @@ public class PvPTimeUpdater {
     }
 
     private static void announce(World w, String msg, String[] cmds) {
-        if((cmds != null) && (cmds.length > 0)) {
-            MinecraftServer server = MinecraftServer.getServer();
-            if(server == null) return;
+        MinecraftServer server = null;
+        if(w instanceof WorldServer) server = w.getMinecraftServer();
+
+        if((cmds != null) && (cmds.length > 0) && server != null) {
             ICommandManager manager = server.getCommandManager();
             for(String cmd : cmds) {
                 manager.executeCommand(server, cmd);
             }
         }
+
         if((msg == null) || (msg.isEmpty())) return;
         if(PvPTime.INSTANCE.atLeastTwoPlayers) {
-            MinecraftServer server = MinecraftServer.getServer();
             if(server == null) return; // Its not even a server
-            if(server.getConfigurationManager().playerEntityList.size() < 2) return;
+            if(server.getPlayerList().getCurrentPlayerCount() < 2) return;
         } else if(PvPTime.INSTANCE.onlyMultiplayer) {
-            MinecraftServer server = MinecraftServer.getServer();
             if(server == null) return;
             if(server.isSinglePlayer()) {
                 IntegratedServer intServer = (IntegratedServer)server;
                 if(!intServer.getPublic()) return;
             }
         }
-        ChatComponentText c = new ChatComponentText(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1"));
-        for(EntityPlayer p : (List<EntityPlayer>)w.playerEntities) {
+        TextComponentString c = new TextComponentString(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1"));
+        for(EntityPlayer p : w.playerEntities) {
             p.addChatMessage(c);
         }
     }

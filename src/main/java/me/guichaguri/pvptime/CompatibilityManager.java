@@ -38,7 +38,7 @@ public class CompatibilityManager {
     public static boolean createBukkitCompatibility(Configuration config, Object world, World mcWorld) {
         if(!(world instanceof org.bukkit.World)) return false;
         org.bukkit.World w = (org.bukkit.World)world;
-        int id = mcWorld.provider.getDimensionId();
+        int id = mcWorld.provider.getDimension();
         String cat = w.getName();
         boolean isOverworld = w.getEnvironment() == Environment.NORMAL;
 
@@ -53,7 +53,7 @@ public class CompatibilityManager {
     public static boolean createSpongeCompatibility(Configuration config, Object world, World mcWorld) {
         if(!(world instanceof org.spongepowered.api.world.World)) return false;
         org.spongepowered.api.world.World w = (org.spongepowered.api.world.World)world;
-        int id = mcWorld.provider.getDimensionId();
+        int id = mcWorld.provider.getDimension();
         String cat = w.getName();
         boolean isOverworld = w.getDimension().getType() == DimensionTypes.OVERWORLD;
 
