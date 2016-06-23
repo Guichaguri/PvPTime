@@ -26,14 +26,14 @@ public class CommandPvPTime extends CommandBase {
             PvPTime.INSTANCE.loadConfig();
 
             TextComponentString txt = new TextComponentString("Config Reloaded!");
-            txt.setChatStyle(txt.getChatStyle().setColor(TextFormatting.GREEN));
+            txt.setStyle(txt.getStyle().setColor(TextFormatting.GREEN));
             sender.addChatMessage(txt);
             
             return;
         }
 
         TextComponentString title = new TextComponentString("---------- PvPTime Info ----------");
-        title.getChatStyle().setColor(TextFormatting.GREEN);
+        title.getStyle().setColor(TextFormatting.GREEN);
 
         sender.addChatMessage(title);
         for(int id : DimensionManager.getIDs()) {
@@ -42,16 +42,16 @@ public class CommandPvPTime extends CommandBase {
             Boolean pvptime = PvPTimeRegistry.isPvPTime(id);
             String on = pvptime == null ? TextFormatting.RED + "Disabled" : (pvptime ? "PvP On" : "PvP Off");
             TextComponentString txt = new TextComponentString("");
-            txt.getChatStyle().setColor(TextFormatting.YELLOW);
+            txt.getStyle().setColor(TextFormatting.YELLOW);
             TextComponentString name = new TextComponentString(n);
-            name.getChatStyle().setColor(TextFormatting.GOLD);
+            name.getStyle().setColor(TextFormatting.GOLD);
             txt.appendSibling(name);
             txt.appendText(": " + on);
             sender.addChatMessage(txt);
         }
 
         TextComponentString footer = new TextComponentString("--------------------------------");
-        footer.getChatStyle().setColor(TextFormatting.GREEN);
+        footer.getStyle().setColor(TextFormatting.GREEN);
         sender.addChatMessage(footer);
     }
 }

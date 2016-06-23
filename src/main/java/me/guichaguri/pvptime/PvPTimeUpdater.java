@@ -1,12 +1,12 @@
 package me.guichaguri.pvptime;
 
-import java.util.HashMap;
 import me.guichaguri.pvptime.api.PvPTimeEvent.PvPTimeUpdateEvent;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -18,6 +18,8 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.HashMap;
 
 public class PvPTimeUpdater {
     private static long ticksLeft = 100;
@@ -62,9 +64,11 @@ public class PvPTimeUpdater {
         @SubscribeEvent
         public void AttackEntityEvent(AttackEntityEvent event) {
             if(event.isCanceled()) return;
-            if(event.target.getEntityId() == event.entityPlayer.getEntityId()) return;
-            if(!(event.target instanceof EntityPlayer)) return;
-            World w = event.entityPlayer.getEntityWorld();
+            Entity target = event.getTarget();
+            EntityPlayer player = event.getEntityPlayer();
+            if(target.getEntityId() == player.getEntityId()) return;
+            if(!(target instanceof EntityPlayer)) return;
+            World w = player.getEntityWorld();
             Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimension());
             if(isPvPTime != null && !isPvPTime) {
                 event.setCanceled(true);
@@ -74,9 +78,10 @@ public class PvPTimeUpdater {
         @SubscribeEvent
         public void LivingAttackEvent(LivingAttackEvent event) {
             if(event.isCanceled()) return;
-            if(event.source == null) return;
-            Entity damager = event.source.getEntity();
-            Entity defender = event.entity;
+            DamageSource source = event.getSource();
+            if(source == null) return;
+            Entity damager = source.getEntity();
+            Entity defender = event.getEntity();
             if(damager == null) return;
             if(defender == null) return;
             if(defender.getEntityId() == damager.getEntityId()) return;
@@ -92,7 +97,7 @@ public class PvPTimeUpdater {
 
         @SubscribeEvent
         public void WorldLoad(WorldEvent.Load event) {
-            int id = event.world.provider.getDimension();
+            int id = event.getWorld().provider.getDimension();
             WorldOptions options = PvPTimeRegistry.getWorldOptions(id);
             if(options == null) {
                 PvPTime.INSTANCE.loadConfig(); // Lets reload the config

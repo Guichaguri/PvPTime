@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.8", acceptableRemoteVersions = "*")
+@Mod(modid="PvPTime", name="PvPTime", version="1.0.9", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     @Mod.Instance(value = "PvPTime")
