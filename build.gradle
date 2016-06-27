@@ -14,12 +14,12 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.0.9"
+version = "1.0.10"
 group = "me.guichaguri.pvptime" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "PvPTime"
 
 minecraft {
-    version = "1.9.4-12.17.0.1970"
+    version = "1.10-12.18.0.1986-1.10.0"
     runDir = "run"
     mappings = "snapshot_20160518"
 }
