@@ -2,7 +2,7 @@ package me.guichaguri.pvptime;
 
 public class WorldOptions {
     private boolean enabled = true;
-    private int engineMode = 1; // 1 OR 2
+    private int engineMode = 1; // -2, -1, 1 or 2
     private int totalDayTime = 24000;
     private int pvptimeStart = 13000;
     private int pvptimeEnd = 500;

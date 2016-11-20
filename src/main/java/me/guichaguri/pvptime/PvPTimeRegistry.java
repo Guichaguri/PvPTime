@@ -38,6 +38,10 @@ public class PvPTimeRegistry {
         World w = DimensionManager.getWorld(dimension);
         if(w == null) return null;
         switch(options.getEngineMode()) {
+            case -2:
+                return true; // PvP always enabled on engine mode -2
+            case -1:
+                return false; // PvP always disabled on engine mode -1
             case 1:
                 return isRawPvPTime1(options, w);
             case 2:
