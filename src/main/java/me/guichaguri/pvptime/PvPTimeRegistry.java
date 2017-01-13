@@ -14,10 +14,7 @@ public class PvPTimeRegistry {
     }
 
     public static WorldOptions getWorldOptions(int dimension) {
-        if(worlds.containsKey(dimension)) {
-            return worlds.get(dimension);
-        }
-        return null;
+        return worlds.get(dimension);
     }
 
     public static Boolean isPvPTime(int dimension) {

@@ -27,9 +27,9 @@ public class PvPTimeEvent extends Event {
         public final int dimensionId;
         public WorldOptions defaultOptions;
 
-        public PvPTimeWorldSetupEvent(int dimensionId, boolean isOverworld) {
+        public PvPTimeWorldSetupEvent(int dimensionId, WorldOptions defaultOptions) {
             this.dimensionId = dimensionId;
-            this.defaultOptions = new WorldOptions(isOverworld);
+            this.defaultOptions = defaultOptions;
         }
 
     }

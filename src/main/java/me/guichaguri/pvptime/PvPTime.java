@@ -13,13 +13,16 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import java.io.File;
 
-@Mod(modid="PvPTime", name="PvPTime", version="1.0.11", acceptableRemoteVersions = "*")
+@Mod(modid = PvPTime.MODID, name = "PvPTime", version = "1.0.12", acceptableRemoteVersions = "*")
 public class PvPTime {
 
-    @Mod.Instance(value = "PvPTime")
+    public static final String MODID = "pvptime";
+
+    @Mod.Instance(value = MODID)
     public static PvPTime INSTANCE;
 
     private File configFile;
+    private WorldOptions defaultOptions;
 
     public boolean onlyMultiplayer = true;
     public boolean atLeastTwoPlayers = false;
@@ -59,6 +62,11 @@ public class PvPTime {
         boolean bukkit = CompatibilityManager.isBukkitServer();
         boolean sponge = CompatibilityManager.isSpongeServer();
 
+        String defCat = "default";
+        config.setCategoryComment(defCat, "Default Options. The options below are copied to newly created dimensions");
+        defaultOptions = new WorldOptions(false);
+        loadValues(config, defCat, defaultOptions);
+
         for(int id : DimensionManager.getIDs()) {
             loadDimensionFromConfig(config, id, bukkit, sponge);
         }
@@ -82,7 +90,9 @@ public class PvPTime {
     }
 
     protected void loadConfig(Configuration config, String cat, int id, String dimName, boolean isOverworld) {
-        PvPTimeWorldSetupEvent setup = new PvPTimeWorldSetupEvent(id, isOverworld);
+        WorldOptions def = new WorldOptions(defaultOptions);
+        def.setEnabled(isOverworld || def.isEnabled());
+        PvPTimeWorldSetupEvent setup = new PvPTimeWorldSetupEvent(id, def);
         MinecraftForge.EVENT_BUS.post(setup);
 
         config.setCategoryComment(cat, "Options for dimension " + id +
@@ -94,6 +104,12 @@ public class PvPTime {
             o.setEngineMode(isOverworld ? 1 : 2);
         }
 
+        loadValues(config, cat, o);
+
+        PvPTimeRegistry.setWorldOptions(id, o);
+    }
+
+    private void loadValues(Configuration config, String cat, WorldOptions o) {
         o.setEnabled(config.get(cat, "enabled", o.isEnabled(), "If PvPTime will be disabled on this dimension").getBoolean());
         o.setEngineMode(config.get(cat, "engineMode", o.getEngineMode(), "1: Configurable Time - 2: Automatic").getInt());
         o.setTotalDayTime(config.get(cat, "totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has").getInt());
@@ -103,8 +119,6 @@ public class PvPTime {
         o.setEndMessage(config.get(cat, "endMessage", o.getEndMessage(), "Message to be broadcasted when the PvP Time ends").getString());
         o.setStartCmds(config.get(cat, "startCmds", o.getStartCmds(), "Commands to be executed when the PvPTime starts").getStringList());
         o.setEndCmds(config.get(cat, "endCmds", o.getEndCmds(), "Commands to be executed when the PvPTime ends").getStringList());
-
-        PvPTimeRegistry.setWorldOptions(id, o);
     }
 
 }

@@ -43,6 +43,10 @@ public class WorldOptions {
         this.pvptimeEnd = pvptimeEnd;
     }
 
+    public WorldOptions(WorldOptions o) {
+        this(o.enabled, o.engineMode, o.totalDayTime, o.pvptimeStart, o.pvptimeEnd, o.startMessage, o.endMessage, o.startCmds, o.endCmds);
+    }
+
     public WorldOptions(boolean enabled) {
         this.enabled = enabled;
     }

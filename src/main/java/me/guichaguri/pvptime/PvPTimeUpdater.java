@@ -87,7 +87,7 @@ public class PvPTimeUpdater {
             if(defender.getEntityId() == damager.getEntityId()) return;
             if(!(defender instanceof EntityPlayer)) return;
             if(damager instanceof EntityPlayer) {
-                World w = damager.worldObj;
+                World w = damager.world;
                 Boolean isPvPTime = PvPTimeRegistry.isPvPTime(w.provider.getDimension());
                 if(isPvPTime != null && !isPvPTime) {
                     event.setCanceled(true);
@@ -163,7 +163,7 @@ public class PvPTimeUpdater {
 
             } else if(engineMode == 2) {
 
-                i = 20;
+                if(20 < i) i = 20;
 
             }
         }
@@ -194,7 +194,7 @@ public class PvPTimeUpdater {
         }
         TextComponentString c = new TextComponentString(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1"));
         for(EntityPlayer p : w.playerEntities) {
-            p.addChatMessage(c);
+            p.sendMessage(c);
         }
     }
 }

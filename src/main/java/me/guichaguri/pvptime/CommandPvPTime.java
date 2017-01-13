@@ -10,12 +10,12 @@ import net.minecraftforge.common.DimensionManager;
 
 public class CommandPvPTime extends CommandBase {
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "pvptime";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return "/pvptime [reload]";
     }
 
@@ -27,7 +27,7 @@ public class CommandPvPTime extends CommandBase {
 
             TextComponentString txt = new TextComponentString("Config Reloaded!");
             txt.setStyle(txt.getStyle().setColor(TextFormatting.GREEN));
-            sender.addChatMessage(txt);
+            sender.sendMessage(txt);
             
             return;
         }
@@ -35,7 +35,7 @@ public class CommandPvPTime extends CommandBase {
         TextComponentString title = new TextComponentString("---------- PvPTime Info ----------");
         title.getStyle().setColor(TextFormatting.GREEN);
 
-        sender.addChatMessage(title);
+        sender.sendMessage(title);
         for(int id : DimensionManager.getIDs()) {
             World w = DimensionManager.getWorld(id);
             String n = w.provider.getDimensionType().getName() + " (" + id + ")";
@@ -47,11 +47,11 @@ public class CommandPvPTime extends CommandBase {
             name.getStyle().setColor(TextFormatting.GOLD);
             txt.appendSibling(name);
             txt.appendText(": " + on);
-            sender.addChatMessage(txt);
+            sender.sendMessage(txt);
         }
 
         TextComponentString footer = new TextComponentString("--------------------------------");
         footer.getStyle().setColor(TextFormatting.GREEN);
-        sender.addChatMessage(footer);
+        sender.sendMessage(footer);
     }
 }
