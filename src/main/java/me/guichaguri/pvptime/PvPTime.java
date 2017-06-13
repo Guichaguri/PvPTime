@@ -1,5 +1,6 @@
 package me.guichaguri.pvptime;
 
+import java.io.File;
 import me.guichaguri.pvptime.api.PvPTimeEvent.PvPTimeWorldSetupEvent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -10,13 +11,14 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-
-@Mod(modid = PvPTime.MODID, name = "PvPTime", version = "1.0.12", acceptableRemoteVersions = "*")
+@Mod(modid = PvPTime.MODID, name = "PvPTime", version = "1.0.13", acceptableRemoteVersions = "*")
 public class PvPTime {
 
     public static final String MODID = "pvptime";
+    public static final Logger LOG = LogManager.getLogger("PvPTime");
 
     @Mod.Instance(value = MODID)
     public static PvPTime INSTANCE;
@@ -39,7 +41,7 @@ public class PvPTime {
 
     @Mod.EventHandler
     public void postStart(FMLServerStartedEvent event) {
-        Log.info("Loading PvPTime config...");
+        LOG.info("Loading PvPTime config...");
         loadConfig();
 
         PvPTimeUpdater.register();
