@@ -1,7 +1,10 @@
-package me.guichaguri.pvptime;
+package com.guichaguri.pvptime.common;
 
-public class WorldOptions {
-    private boolean enabled = true;
+import com.guichaguri.pvptime.api.IWorldOptions;
+
+public class WorldOptions implements IWorldOptions {
+
+    private boolean enabled = false;
     private int engineMode = 1; // -2, -1, 1 or 2
     private int totalDayTime = 24000;
     private int pvptimeStart = 13000;
@@ -19,11 +22,6 @@ public class WorldOptions {
         this.endCmds = endCmds;
     }
 
-    public WorldOptions(boolean enabled, int totalDayTime, int pvptimeStart, int pvptimeEnd,
-                        String startMessage, String endMessage, String[] startCmds, String[] endCmds) {
-        this(enabled, 1, totalDayTime, pvptimeStart, pvptimeEnd, startMessage, endMessage, startCmds, endCmds);
-    }
-
     public WorldOptions(boolean enabled, int engineMode, int pvptimeStart, int pvptimeEnd, String startMessage, String endMessage) {
         this.enabled = enabled;
         this.engineMode = engineMode;
@@ -33,93 +31,103 @@ public class WorldOptions {
         this.endMessage = endMessage;
     }
 
-    public WorldOptions(boolean enabled, int pvptimeStart, int pvptimeEnd, String startMessage, String endMessage) {
-        this(enabled, 1, pvptimeStart, pvptimeEnd, startMessage, endMessage);
+    public WorldOptions(IWorldOptions o) {
+        this(o.isEnabled(), o.getEngineMode(),
+                o.getTotalDayTime(), o.getPvPTimeStart(), o.getPvPTimeEnd(),
+                o.getStartMessage(), o.getEndMessage(),
+                o.getStartCmds(), o.getEndCmds());
     }
 
-    public WorldOptions(int pvptimeStart, int pvptimeEnd) {
-        this.enabled = true;
-        this.pvptimeStart = pvptimeStart;
-        this.pvptimeEnd = pvptimeEnd;
-    }
+    public WorldOptions() {}
 
-    public WorldOptions(WorldOptions o) {
-        this(o.enabled, o.engineMode, o.totalDayTime, o.pvptimeStart, o.pvptimeEnd, o.startMessage, o.endMessage, o.startCmds, o.endCmds);
-    }
-
-    public WorldOptions(boolean enabled) {
-        this.enabled = enabled;
-    }
-
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
+    @Override
     public int getEngineMode() {
         return engineMode;
     }
 
+    @Override
     public void setEngineMode(int engineMode) {
         this.engineMode = engineMode;
     }
 
+    @Override
     public int getPvPTimeStart() {
         return pvptimeStart;
     }
 
+    @Override
     public void setPvPTimeStart(int pvptimeStart) {
         this.pvptimeStart = pvptimeStart;
     }
 
+    @Override
     public int getPvPTimeEnd() {
         return pvptimeEnd;
     }
 
+    @Override
     public void setPvPTimeEnd(int pvptimeEnd) {
         this.pvptimeEnd = pvptimeEnd;
     }
 
+    @Override
     public String getStartMessage() {
         return startMessage;
     }
 
+    @Override
     public void setStartMessage(String startMessage) {
         this.startMessage = startMessage;
     }
 
+    @Override
     public String getEndMessage() {
         return endMessage;
     }
 
+    @Override
     public void setEndMessage(String endMessage) {
         this.endMessage = endMessage;
     }
 
+    @Override
     public String[] getStartCmds() {
         return startCmds;
     }
 
+    @Override
     public void setStartCmds(String[] startCmds) {
         this.startCmds = startCmds;
     }
 
+    @Override
     public String[] getEndCmds() {
         return endCmds;
     }
 
+    @Override
     public void setEndCmds(String[] endCmds) {
         this.endCmds = endCmds;
     }
 
+    @Override
     public int getTotalDayTime() {
         return totalDayTime;
     }
 
+    @Override
     public void setTotalDayTime(int totalDayTime) {
         this.totalDayTime = totalDayTime;
     }
+
 }

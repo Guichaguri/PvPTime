@@ -1,6 +1,6 @@
-# [PvPTime](http://guichaguri.github.io/PvPTime/)
-PvPTime for Minecraft Forge
+# [PvPTime](http://guichaguri.com/PvPTime/)
+PvPTime for Forge, Sponge and Bukkit
 
-* [Downloads](http://guichaguri.github.io/PvPTime/)
-* [Curse Forge](http://minecraft.curseforge.com/mc-mods/227151-pvptime)
-* [Bukkit Version](http://dev.bukkit.org/bukkit-plugins/pvptime/) ([Source Code](https://github.com/Guichaguri/PvPTime-Bukkit))
+* [Downloads](http://guichaguri.com/PvPTime/)
+* [CurseForge](https://minecraft.curseforge.com/projects/pvptime)
+* [Bukkit](https://dev.bukkit.org/projects/pvptime)

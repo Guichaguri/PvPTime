@@ -1,0 +1,75 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.12'
+    }
+}
+
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+
+group 'com.guichaguri.pvptime'
+version ver
+
+sourceCompatibility = targetCompatibility = "1.8"
+compileJava {
+    sourceCompatibility = targetCompatibility = "1.8"
+}
+
+repositories {
+    jcenter()
+    maven {
+        name = 'sponge'
+        url = 'http://repo.spongepowered.org/maven'
+    }
+    maven {
+        name = 'spigot'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    // Common
+    compile project(':common')
+
+    // Sponge
+    compile 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
+
+    // Bukkit
+    compile 'org.bukkit:bukkit:1.12-R0.1-SNAPSHOT'
+}
+
+def processYaml(Yaml yaml, File file) {
+    println("Updating version from " + file.name)
+
+    def data = (Map)yaml.load(file.text)
+    data.put("version", ver);
+    file.text = yaml.dump(data)
+}
+
+processResources {
+    def options = new DumperOptions();
+    options.prettyFlow = true;
+    options.defaultFlowStyle = FlowStyle.BLOCK
+    def yaml = new Yaml(options)
+
+    processYaml(yaml, file("src/main/resources/plugin.yml"))
+}
+
+shadowJar {
+    baseName = 'PvPTime-Plugin'
+    classifier = null
+
+    dependencies {
+        include project(':common')
+    }
+}

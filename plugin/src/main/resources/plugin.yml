@@ -1,0 +1,32 @@
+name: PvPTime
+main: com.guichaguri.pvptime.bukkit.PvPTimeBukkit
+version: 2.0.0
+description: Lets you choose what in-game hours you want PvP enabled.
+authors:
+- Guichaguri
+- Erbros
+website: http://guichaguri.com
+commands:
+  pvptime:
+    description: Information regarding usage of PvPTime.
+    usage: /<command> [info/reload]
+permissions:
+  pvptime.*:
+    description: Full access to all PvPTime features.
+    children:
+      pvptime.nopvp: true
+      pvptime.override: true
+      pvptime.reload: true
+      pvptime.info: true
+  pvptime.nopvp:
+    description: Permission to disable PvP for a player
+    default: false
+  pvptime.override:
+    description: Let the player deal damage even when it's not pvp time.
+    default: false
+  pvptime.reload:
+    description: Permission to reload the configs.
+    default: op
+  pvptime.info:
+    description: Permission to get config info.
+    default: true

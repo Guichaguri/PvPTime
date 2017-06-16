@@ -1,0 +1,15 @@
+[
+{
+  "modid": "pvptime",
+  "name": "PvPTime",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "description": "Lets you choose what in-game hours you want PvP enabled.",
+  "url": "http://guichaguri.com",
+  "authorList": [ "Guichaguri" ],
+  "credits": "Erbros for the original idea and plugin",
+  "requiredMods": [],
+  "dependencies": [],
+  "dependants": []
+}
+]
