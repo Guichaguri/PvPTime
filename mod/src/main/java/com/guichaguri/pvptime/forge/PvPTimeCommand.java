@@ -13,11 +13,11 @@ import net.minecraftforge.common.DimensionManager;
 /**
  * @author Guilherme Chaguri
  */
-public class InfoCommand extends CommandBase {
+public class PvPTimeCommand extends CommandBase {
 
     private final PvPTimeForge mod;
 
-    public InfoCommand(PvPTimeForge mod) {
+    public PvPTimeCommand(PvPTimeForge mod) {
         this.mod = mod;
     }
 
@@ -50,7 +50,7 @@ public class InfoCommand extends CommandBase {
     }
 
     private void info(ICommandSender sender, boolean onlyCurrent) {
-        sender.sendMessage(create("---------- PvPTime ----------", TextFormatting.GREEN));
+        sender.sendMessage(create("------------ PvPTime ------------", TextFormatting.GREEN));
 
         if(onlyCurrent) {
             infoWorld(sender, sender.getEntityWorld(), "Current World");
@@ -88,7 +88,7 @@ public class InfoCommand extends CommandBase {
     }
 
     private void help(ICommandSender sender) {
-        sender.sendMessage(create("---------- PvPTime ----------", TextFormatting.GREEN));
+        sender.sendMessage(create("------------ PvPTime ------------", TextFormatting.GREEN));
 
         ITextComponent infoDescription = create("Shows information about the worlds", TextFormatting.YELLOW);
         sender.sendMessage(create("/pvptime info ", TextFormatting.GOLD).appendSibling(infoDescription));

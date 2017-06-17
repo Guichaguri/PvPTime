@@ -45,7 +45,7 @@ public class PvPTimeCommand implements CommandExecutor {
             return;
         }
 
-        sender.sendMessage(ChatColor.GREEN + "---------- PvPTime ----------");
+        sender.sendMessage(ChatColor.GREEN + "------------ PvPTime ------------");
 
         if(onlyCurrent && sender instanceof Player) {
             infoWorld(sender, ((Player)sender).getWorld(), "Current World");
@@ -77,7 +77,7 @@ public class PvPTimeCommand implements CommandExecutor {
     }
 
     private void help(CommandSender sender) {
-        sender.sendMessage(ChatColor.GREEN + "---------- PvPTime ----------");
+        sender.sendMessage(ChatColor.GREEN + "------------ PvPTime ------------");
         sender.sendMessage(ChatColor.GOLD + "/pvptime info " + ChatColor.YELLOW + "Shows information about the worlds");
         sender.sendMessage(ChatColor.GOLD + "/pvptime reload " + ChatColor.YELLOW + "Reloads the configuration file");
         sender.sendMessage(ChatColor.GREEN + "--------------------------------");

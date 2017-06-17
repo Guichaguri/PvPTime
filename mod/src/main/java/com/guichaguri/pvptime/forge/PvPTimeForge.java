@@ -1,8 +1,12 @@
 package com.guichaguri.pvptime.forge;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
+import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.common.WorldOptions;
-import com.guichaguri.pvptime.api.IWorldOptions;
 import java.io.File;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,16 +18,18 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 /**
  * @author Guilherme Chaguri
@@ -40,19 +46,24 @@ public class PvPTimeForge {
 
     private File configFile;
     private Configuration config;
+
+    private WorldOptions defaultOptions;
+
     private long ticksLeft = 0;
 
     @EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
+        engine = new EngineForge();
+        PvPTimeAPI.setAPI(engine);
+
         configFile = event.getSuggestedConfigurationFile();
+
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     @EventHandler
     public void onStart(FMLServerStartingEvent event) {
-        engine = new EngineForge();
-
-        event.registerServerCommand(new InfoCommand(this));
+        event.registerServerCommand(new PvPTimeCommand(this));
     }
 
     @EventHandler
@@ -66,6 +77,16 @@ public class PvPTimeForge {
         config.save();
     }
 
+    @EventHandler
+    public void imc(IMCEvent event) {
+        for(IMCMessage msg : event.getMessages()) {
+            if(!msg.key.equalsIgnoreCase("pvptime")) continue;
+
+            Optional<Function<IPvPTimeAPI, Void>> func = msg.getFunctionValue(IPvPTimeAPI.class, Void.class);
+            if(func.isPresent()) func.get().apply(engine);
+        }
+    }
+
     protected EngineForge getEngine() {
         return engine;
     }
@@ -73,35 +94,41 @@ public class PvPTimeForge {
     protected void reloadConfig() {
         config = new Configuration(configFile);
         config.load();
+        engine.resetWorldOptions();
     }
 
     protected void loadConfig() {
         if(config == null) reloadConfig();
 
-        engine.setOnlyMultiplayer(config.getBoolean("general", "onlyMultiplayer", true, "Messages will broadcast when is a server or lan"));
-        engine.setAtLeastTwoPlayers(config.getBoolean("general", "atLeastTwoPlayers", false, "Messages will broadcast if there's at least two players online"));
+        engine.setOnlyMultiplayer(config.get("general", "onlyMultiplayer", true, "Messages will broadcast when is a server or lan").getBoolean());
+        engine.setAtLeastTwoPlayers(config.get("general", "atLeastTwoPlayers", false, "Messages will broadcast if there's at least two players online").getBoolean());
+        config.setCategoryComment("general", "General Configuration");
 
-        WorldOptions defaultOptions = new WorldOptions();
+        defaultOptions = new WorldOptions();
         config.setCategoryComment("default", "Default Options. The options below are copied to newly created dimensions");
         loadDimension(config, "default", defaultOptions);
 
         for(int id : DimensionManager.getIDs()) {
-            World w = DimensionManager.getWorld(id);
-            boolean isSurface = w != null ? w.provider.isSurfaceWorld() : id == 0;
-
-            WorldOptions def = new WorldOptions(defaultOptions);
-            def.setEnabled(isSurface || def.isEnabled());
-
-            String cat = Integer.toString(id);
-            String name = cat + (w != null ? " - " + w.provider.getDimensionType().getName() : "");
-            config.setCategoryComment(cat, "Options for dimension " + name);
-
-            loadDimension(config, cat, def);
-
-            engine.setWorldOptions(id, def);
+            loadDimension(defaultOptions, id);
         }
 
         ticksLeft = engine.update();
+    }
+
+    private void loadDimension(WorldOptions defaultOptions, int id) {
+        World w = DimensionManager.getWorld(id);
+        boolean isSurface = w != null ? w.provider.isSurfaceWorld() : id == 0;
+
+        WorldOptions def = new WorldOptions(defaultOptions);
+        def.setEnabled(isSurface || def.isEnabled());
+
+        String cat = "dimension_" + id;
+        String name = id + (w != null ? " (" + w.provider.getDimensionType().getName() : ")");
+        config.setCategoryComment(cat, "Options for dimension " + name);
+
+        loadDimension(config, cat, def);
+
+        engine.setWorldOptions(id, def);
     }
 
     private void loadDimension(Configuration config, String cat, WorldOptions o) {
@@ -117,7 +144,7 @@ public class PvPTimeForge {
     }
 
     @SubscribeEvent
-    public void onServerTick(TickEvent.ServerTickEvent event) {
+    public void onServerTick(ServerTickEvent event) {
         if(ticksLeft-- <= 0) {
             ticksLeft = engine.update();
         }
@@ -178,12 +205,13 @@ public class PvPTimeForge {
     }
 
     @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load event) {
+    public void onWorldLoad(Load event) {
         int id = event.getWorld().provider.getDimension();
 
         IWorldOptions options = engine.getWorldOptions(id);
         if(options == null) {
-            loadConfig(); // Lets reload the config
+            if(defaultOptions == null) loadConfig();
+            loadDimension(defaultOptions, id);
         }
     }
 

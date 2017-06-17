@@ -2,6 +2,7 @@ package com.guichaguri.pvptime.sponge;
 
 import com.google.inject.Inject;
 import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
@@ -13,13 +14,16 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -40,19 +44,21 @@ import org.spongepowered.api.world.World;
 )
 public class PvPTimeSponge implements Runnable {
 
+    private EngineSponge engine;
+
     @Inject
     @DefaultConfig(sharedRoot = true)
     private ConfigurationLoader<CommentedConfigurationNode> config;
-
     private CommentedConfigurationNode configRoot;
 
-    private EngineSponge engine;
+    private WorldOptions defaultOptions;
 
     private Task task;
 
     @Listener
-    public void onStart(GameStartingServerEvent event) {
+    public void onInit(GamePreInitializationEvent event) {
         engine = new EngineSponge();
+        PvPTimeAPI.setAPI(engine);
 
         PvPTimeCommand executor = new PvPTimeCommand(this);
 
@@ -99,6 +105,7 @@ public class PvPTimeSponge implements Runnable {
         } catch(IOException ex) {
             configRoot = config.createEmptyNode();
         }
+        engine.resetWorldOptions();
     }
 
     protected void loadConfig() {
@@ -106,21 +113,25 @@ public class PvPTimeSponge implements Runnable {
 
         engine.setAtLeastTwoPlayers(configRoot.getNode("general", "atLeastTwoPlayers").getBoolean(false));
 
-        WorldOptions defaultOptions = new WorldOptions();
+        defaultOptions = new WorldOptions();
         loadWorld(configRoot.getNode("default"), defaultOptions);
 
         for(World world : Sponge.getServer().getWorlds()) {
-            boolean isSurface = world.getDimension().getType() == DimensionTypes.OVERWORLD;
-
-            WorldOptions def = new WorldOptions(defaultOptions);
-            def.setEnabled(isSurface || def.isEnabled());
-
-            loadWorld(configRoot.getNode("world", world.getName()), def);
-
-            engine.setWorldOptions(world.getName(), def);
+            loadWorld(defaultOptions, world);
         }
 
         updateTimer(engine.update());
+    }
+
+    private void loadWorld(WorldOptions defaultOptions, World world) {
+        boolean isSurface = world.getDimension().getType() == DimensionTypes.OVERWORLD;
+
+        WorldOptions def = new WorldOptions(defaultOptions);
+        def.setEnabled(isSurface || def.isEnabled());
+
+        loadWorld(configRoot.getNode("world", world.getName()), def);
+
+        engine.setWorldOptions(world.getName(), def);
     }
 
     private void loadWorld(CommentedConfigurationNode root, WorldOptions o) {
@@ -142,6 +153,8 @@ public class PvPTimeSponge implements Runnable {
     }
 
     private void updateTimer(long timeLeft) {
+        if(timeLeft <= 0) timeLeft = 1; // Prevents the server from freezing if something goes wrong
+
         if(task != null) task.cancel();
         task = Sponge.getScheduler().createTaskBuilder().delayTicks(timeLeft).execute(this).submit(this);
     }
@@ -160,18 +173,30 @@ public class PvPTimeSponge implements Runnable {
     }
 
     @Listener(order = Order.LAST)
-    public void onDamage(DamageEntityEvent event, EntityDamageSource source) {
+    public void onDamage(DamageEntityEvent event, @First EntityDamageSource source) {
         Entity victim = event.getTargetEntity();
         if(!(victim instanceof Player)) return;
 
         Entity attacker = source.getSource();
-        if(!(attacker instanceof Player)) return;
+        Player player = null;
+
+        if(attacker instanceof Player) {
+            player = (Player)attacker;
+        } else if(attacker instanceof Projectile) {
+            ProjectileSource shooter = ((Projectile)attacker).getShooter();
+            if(shooter instanceof Player) player = (Player)shooter;
+        }
+
+        if(player == null) return;
+
+        // Player shot himself?
+        if(player.getUniqueId().equals(victim.getUniqueId())) return;
 
         if(((Player)victim).hasPermission("pvptime.nopvp")) {
             // The victim has the permission to disable pvp even in night time
             event.setCancelled(true);
             return;
-        } else if(((Player)attacker).hasPermission("pvptime.override")) {
+        } else if(player.hasPermission("pvptime.override")) {
             // The attacker has the permission to enable pvp even in day time
             return;
         }
@@ -186,10 +211,12 @@ public class PvPTimeSponge implements Runnable {
 
     @Listener(order = Order.BEFORE_POST)
     public void onWorldLoad(LoadWorldEvent event) {
-        IWorldOptions options = engine.getWorldOptions(event.getTargetWorld().getName());
+        World world = event.getTargetWorld();
+        IWorldOptions options = engine.getWorldOptions(world.getName());
 
         if(options == null) {
-            loadConfig(); // Lets reload the config
+            if(defaultOptions == null) loadConfig();
+            loadWorld(defaultOptions, world);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.guichaguri.pvptime.bukkit;
 
 import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.util.List;
 import org.bukkit.Bukkit;
@@ -30,13 +31,17 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
 
     private EngineBukkit engine;
 
+    private WorldOptions defaultOptions;
+
     private int task = -1;
 
     @Override
     public void onEnable() {
         engine = new EngineBukkit();
+        PvPTimeAPI.setAPI(engine);
 
         getServer().getPluginManager().registerEvents(this, this);
+
         getCommand("pvptime").setExecutor(new PvPTimeCommand(this));
 
         loadConfig();
@@ -52,26 +57,36 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         return engine;
     }
 
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
+        engine.resetWorldOptions();
+    }
+
     protected void loadConfig() {
         Configuration config = getConfig();
 
         engine.setAtLeastTwoPlayers(config.getBoolean("general.atLeastTwoPlayers", false));
 
-        WorldOptions defaultOptions = new WorldOptions();
+        defaultOptions = new WorldOptions();
         loadWorld(config, "default", defaultOptions);
 
         for(World world : Bukkit.getWorlds()) {
-            boolean isSurface = world.getEnvironment() == Environment.NORMAL;
-
-            WorldOptions def = new WorldOptions(defaultOptions);
-            def.setEnabled(isSurface || def.isEnabled());
-
-            loadWorld(config, "world." + world.getName(), def);
-
-            engine.setWorldOptions(world.getName(), def);
+            loadWorld(defaultOptions, world);
         }
 
         updateTimer(engine.update());
+    }
+
+    private void loadWorld(WorldOptions defaultOptions, World world) {
+        boolean isSurface = world.getEnvironment() == Environment.NORMAL;
+
+        WorldOptions def = new WorldOptions(defaultOptions);
+        def.setEnabled(isSurface || def.isEnabled());
+
+        loadWorld(getConfig(), "world." + world.getName(), def);
+
+        engine.setWorldOptions(world.getName(), def);
     }
 
     private void loadWorld(Configuration config, String cat, WorldOptions o) {
@@ -93,6 +108,8 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     }
 
     private void updateTimer(long ticksLeft) {
+        if(ticksLeft <= 0) ticksLeft = 1; // Prevents the server from freezing if something goes wrong
+
         BukkitScheduler scheduler = Bukkit.getScheduler();
         if(task != -1) scheduler.cancelTask(task);
         task = scheduler.scheduleSyncDelayedTask(this, this, ticksLeft);
@@ -181,10 +198,12 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
 
     @EventHandler
     public void onWorldLoad(WorldInitEvent event) {
-        IWorldOptions options = engine.getWorldOptions(event.getWorld().getName());
+        World world = event.getWorld();
+        IWorldOptions options = engine.getWorldOptions(world.getName());
 
         if(options == null) {
-            loadConfig(); // Lets reload the config
+            if(defaultOptions == null) loadConfig();
+            loadWorld(defaultOptions, world);
         }
     }
 }

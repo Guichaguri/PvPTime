@@ -21,6 +21,10 @@ public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
         this.cache = cache;
     }
 
+    public void resetWorldOptions() {
+        dimensions.clear();
+    }
+
     public long update() {
         long ticksLeft = Long.MAX_VALUE;
 
@@ -71,9 +75,9 @@ public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
         long time = totalTime % options.getTotalDayTime();
 
         if(startTime < endTime) {
-            return time > startTime && time < endTime;
+            return time >= startTime && time < endTime;
         } else {
-            return time > startTime || time < endTime;
+            return time >= startTime || time < endTime;
         }
     }
 

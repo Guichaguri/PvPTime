@@ -44,7 +44,7 @@ public class PvPTimeCommand implements CommandExecutor {
     }
 
     private void info(CommandSource src, boolean onlyCurrent) {
-        src.sendMessage(Text.builder("---------- PvPTime ----------").color(TextColors.GREEN).build());
+        src.sendMessage(Text.builder("------------ PvPTime ------------").color(TextColors.GREEN).build());
 
         if(onlyCurrent && src instanceof Player) {
             infoWorld(src, ((Player)src).getWorld(), "Current World");
@@ -72,12 +72,12 @@ public class PvPTimeCommand implements CommandExecutor {
     }
 
     private void help(CommandSource src) {
-        src.sendMessage(Text.builder("---------- PvPTime ----------").color(TextColors.GREEN).build());
+        src.sendMessage(Text.builder("------------ PvPTime ------------").color(TextColors.GREEN).build());
 
         Text infoDescription = Text.builder("Shows information about the worlds").color(TextColors.YELLOW).build();
         src.sendMessage(Text.builder("/pvptime info ").color(TextColors.GOLD).append(infoDescription).build());
 
-        Text reloadDescription = Text.builder("Reloads the configuration file").build();
+        Text reloadDescription = Text.builder("Reloads the configuration file").color(TextColors.YELLOW).build();
         src.sendMessage(Text.builder("/pvptime reload ").color(TextColors.GOLD).append(reloadDescription).build());
 
         src.sendMessage(Text.builder("--------------------------------").color(TextColors.GREEN).build());
