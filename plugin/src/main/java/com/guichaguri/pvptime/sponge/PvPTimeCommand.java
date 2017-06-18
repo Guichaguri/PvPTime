@@ -1,5 +1,6 @@
 package com.guichaguri.pvptime.sponge;
 
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -58,7 +59,7 @@ public class PvPTimeCommand implements CommandExecutor {
     }
 
     private void infoWorld(CommandSource src, World world, String name) {
-        EngineSponge engine = plugin.getEngine();
+        IPvPTimeAPI<String> engine = plugin.getAPI();
         Boolean isPvPTime = engine.isPvPTime(world.getName());
 
         Text pvp;

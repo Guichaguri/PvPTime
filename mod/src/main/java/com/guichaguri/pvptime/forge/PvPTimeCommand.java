@@ -1,5 +1,6 @@
 package com.guichaguri.pvptime.forge;
 
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -64,7 +65,7 @@ public class PvPTimeCommand extends CommandBase {
     }
 
     private void infoWorld(ICommandSender sender, World world, String name) {
-        EngineForge engine = mod.getEngine();
+        IPvPTimeAPI<Integer> engine = mod.getAPI();
         Boolean isPvPTime = engine.isPvPTime(world.provider.getDimension());
 
         ITextComponent pvp;

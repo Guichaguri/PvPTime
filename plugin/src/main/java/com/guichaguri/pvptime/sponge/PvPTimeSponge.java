@@ -1,12 +1,15 @@
 package com.guichaguri.pvptime.sponge;
 
 import com.google.inject.Inject;
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
@@ -95,7 +98,7 @@ public class PvPTimeSponge implements Runnable {
         }
     }
 
-    protected EngineSponge getEngine() {
+    public IPvPTimeAPI<String> getAPI() {
         return engine;
     }
 
@@ -111,7 +114,7 @@ public class PvPTimeSponge implements Runnable {
     protected void loadConfig() {
         if(configRoot == null) reloadConfig();
 
-        engine.setAtLeastTwoPlayers(configRoot.getNode("general", "atLeastTwoPlayers").getBoolean(false));
+        engine.setAtLeastTwoPlayers(getConfigElement(configRoot.getNode("general", "atLeastTwoPlayers"), false));
 
         defaultOptions = new WorldOptions();
         loadWorld(configRoot.getNode("default"), defaultOptions);
@@ -135,21 +138,32 @@ public class PvPTimeSponge implements Runnable {
     }
 
     private void loadWorld(CommentedConfigurationNode root, WorldOptions o) {
-        o.setEnabled(root.getNode("enabled").getBoolean(o.isEnabled()));
-        o.setEngineMode(root.getNode("engineMode").getInt(o.getEngineMode()));
-        o.setTotalDayTime(root.getNode("totalDayTime").getInt(o.getTotalDayTime()));
-        o.setPvPTimeStart(root.getNode("startTime").getInt(o.getPvPTimeStart()));
-        o.setPvPTimeEnd(root.getNode("endTime").getInt(o.getPvPTimeEnd()));
-        o.setStartMessage(root.getNode("startMessage").getString(o.getStartMessage()));
-        o.setEndMessage(root.getNode("endMessage").getString(o.getEndMessage()));
-        o.setStartCmds(getList(root.getNode("startCmds"), o.getStartCmds()));
-        o.setEndCmds(getList(root.getNode("endCmds"), o.getEndCmds()));
+        o.setEnabled(getConfigElement(root.getNode("enabled"), o.isEnabled()));
+        o.setEngineMode(getConfigElement(root.getNode("engineMode"), o.getEngineMode()));
+        o.setTotalDayTime(getConfigElement(root.getNode("totalDayTime"), o.getTotalDayTime()));
+        o.setPvPTimeStart(getConfigElement(root.getNode("startTime"), o.getPvPTimeStart()));
+        o.setPvPTimeEnd(getConfigElement(root.getNode("endTime"), o.getPvPTimeEnd()));
+        o.setStartMessage(getConfigElement(root.getNode("startMessage"), o.getStartMessage()));
+        o.setEndMessage(getConfigElement(root.getNode("endMessage"), o.getEndMessage()));
+        o.setStartCmds(getStringList(root.getNode("startCmds"), o.getStartCmds()));
+        o.setEndCmds(getStringList(root.getNode("endCmds"), o.getEndCmds()));
     }
 
-    private String[] getList(CommentedConfigurationNode node, String[] def) {
-        if(node.isVirtual()) return def;
-        List<String> list = node.getList(Object::toString);
-        return list.toArray(new String[list.size()]);
+    private <T> T getConfigElement(ConfigurationNode node, T def) {
+        if(!node.isVirtual()) {
+            return (T)node.getValue(def);
+        }
+        node.setValue(def);
+        return def;
+    }
+
+    private String[] getStringList(CommentedConfigurationNode node, String[] def) {
+        if(!node.isVirtual()) {
+            List<String> list = node.getList(Object::toString);
+            return list.toArray(new String[list.size()]);
+        }
+        node.setValue(Arrays.asList(def));
+        return def;
     }
 
     private void updateTimer(long timeLeft) {

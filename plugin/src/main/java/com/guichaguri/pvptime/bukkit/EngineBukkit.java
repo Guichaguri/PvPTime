@@ -1,19 +1,62 @@
 package com.guichaguri.pvptime.bukkit;
 
-import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.common.PvPTime;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.HashMap;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
 /**
  * @author Guilherme Chaguri
  */
 public class EngineBukkit extends PvPTime<String> {
+
+    private Plugin worldguard, towny;
+
     public EngineBukkit() {
         super(new HashMap<>(), new HashMap<>());
+        prepareDependencies();
+    }
+
+    private void prepareDependencies() {
+        PluginManager manager = Bukkit.getServer().getPluginManager();
+        worldguard = manager.getPlugin("WorldGuard");
+        towny = manager.getPlugin("Towny");
+    }
+
+    private boolean isPvPForced(Location loc) {
+        if(worldguard != null) {
+            WorldGuardPlugin wg = (WorldGuardPlugin)worldguard;
+            ApplicableRegionSet set = wg.getRegionManager(loc.getWorld()).getApplicableRegions(loc);
+
+            for(ProtectedRegion region : set) {
+                // region.getFlag(DefaultFlag.PVP) leads to runtime errors for whatever reason
+                if(region.getFlags().get(DefaultFlag.PVP) == State.ALLOW) return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected boolean isPvPForced(Location attacker, Location victim) {
+        if(isPvPForced(attacker) && isPvPForced(victim)) return true;
+
+        if(towny != null) {
+            if(TownyUniverse.isWarTime()) return true;
+        }
+
+        return false;
     }
 
     @Override

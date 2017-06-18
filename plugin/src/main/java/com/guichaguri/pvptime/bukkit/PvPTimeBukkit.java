@@ -1,8 +1,10 @@
 package com.guichaguri.pvptime.bukkit;
 
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.WorldOptions;
+import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -53,7 +55,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         saveConfig();
     }
 
-    protected EngineBukkit getEngine() {
+    public IPvPTimeAPI<String> getAPI() {
         return engine;
     }
 
@@ -64,12 +66,10 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     }
 
     protected void loadConfig() {
-        Configuration config = getConfig();
-
-        engine.setAtLeastTwoPlayers(config.getBoolean("general.atLeastTwoPlayers", false));
+        engine.setAtLeastTwoPlayers(getConfigElement("general.atLeastTwoPlayers", false));
 
         defaultOptions = new WorldOptions();
-        loadWorld(config, "default", defaultOptions);
+        loadWorld("default", defaultOptions);
 
         for(World world : Bukkit.getWorlds()) {
             loadWorld(defaultOptions, world);
@@ -84,27 +84,42 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         WorldOptions def = new WorldOptions(defaultOptions);
         def.setEnabled(isSurface || def.isEnabled());
 
-        loadWorld(getConfig(), "world." + world.getName(), def);
+        loadWorld("world." + world.getName(), def);
 
         engine.setWorldOptions(world.getName(), def);
     }
 
-    private void loadWorld(Configuration config, String cat, WorldOptions o) {
-        o.setEnabled(config.getBoolean(cat + ".enabled", o.isEnabled()));
-        o.setEngineMode(config.getInt(cat + ".engineMode", o.getEngineMode()));
-        o.setTotalDayTime(config.getInt(cat + ".totalDayTime", o.getTotalDayTime()));
-        o.setPvPTimeStart(config.getInt(cat + ".startTime", o.getPvPTimeStart()));
-        o.setPvPTimeEnd(config.getInt(cat + ".endTime", o.getPvPTimeEnd()));
-        o.setStartMessage(config.getString(cat + ".startMessage", o.getStartMessage()));
-        o.setEndMessage(config.getString(cat + ".endMessage", o.getEndMessage()));
-        o.setStartCmds(getStringList(config, cat + ".startCmds", o.getStartCmds()));
-        o.setEndCmds(getStringList(config, cat + ".endCmds", o.getEndCmds()));
+    private void loadWorld(String cat, WorldOptions o) {
+        o.setEnabled(getConfigElement(cat + ".enabled", o.isEnabled()));
+        o.setEngineMode(getConfigElement(cat + ".engineMode", o.getEngineMode()));
+        o.setTotalDayTime(getConfigElement(cat + ".totalDayTime", o.getTotalDayTime()));
+        o.setPvPTimeStart(getConfigElement(cat + ".startTime", o.getPvPTimeStart()));
+        o.setPvPTimeEnd(getConfigElement(cat + ".endTime", o.getPvPTimeEnd()));
+        o.setStartMessage(getConfigElement(cat + ".startMessage", o.getStartMessage()));
+        o.setEndMessage(getConfigElement(cat + ".endMessage", o.getEndMessage()));
+        o.setStartCmds(getStringList(cat + ".startCmds", o.getStartCmds()));
+        o.setEndCmds(getStringList(cat + ".endCmds", o.getEndCmds()));
     }
 
-    private String[] getStringList(Configuration config, String path, String[] def) {
-        if(!config.contains(path)) return def;
-        List<String> list = config.getStringList(path);
-        return list.toArray(new String[list.size()]);
+    private <T> T getConfigElement(String path, T def) {
+        Configuration config = getConfig();
+
+        if(config.contains(path)) {
+            return (T)config.get(path, def);
+        }
+        config.set(path, def);
+        return def;
+    }
+
+    private String[] getStringList(String path, String[] def) {
+        Configuration config = getConfig();
+
+        if(config.contains(path)) {
+            List<String> list = config.getStringList(path);
+            return list.toArray(new String[list.size()]);
+        }
+        config.set(path, Arrays.asList(def));
+        return def;
     }
 
     private void updateTimer(long ticksLeft) {
@@ -148,6 +163,11 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         // The attacker is not a player
         if(attackerPlayer == null) return;
 
+        // Player shot itself?
+        if(attackerPlayer.getUniqueId().equals(victim.getUniqueId())) return;
+
+        if(engine.isPvPForced(attackerPlayer.getLocation(), victim.getLocation())) return;
+
         if(victim.hasPermission("pvptime.nopvp")) {
             // The victim has the permission to disable pvp even in night time
             event.setCancelled(true);
@@ -177,6 +197,8 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         for(LivingEntity entity : event.getAffectedEntities()) {
             // Ignore entities that are not players
             if(!(entity instanceof Player)) continue;
+
+            if(engine.isPvPForced(attacker.getLocation(), entity.getLocation())) continue;
 
             if(entity.hasPermission("pvptime.nopvp")) {
                 // The victim has the permission to disable pvp even in night time

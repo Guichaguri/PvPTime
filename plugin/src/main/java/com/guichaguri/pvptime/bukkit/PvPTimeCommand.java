@@ -1,6 +1,7 @@
 package com.guichaguri.pvptime.bukkit;
 
 
+import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -59,7 +60,7 @@ public class PvPTimeCommand implements CommandExecutor {
     }
 
     private void infoWorld(CommandSender sender, World world, String name) {
-        EngineBukkit engine = plugin.getEngine();
+        IPvPTimeAPI<String> engine = plugin.getAPI();
         Boolean isPvPTime = engine.isPvPTime(world.getName());
 
         String pvp = isPvPTime == null ? ChatColor.RED + "Disabled" : (isPvPTime ? "PvP On" : "PvP Off");

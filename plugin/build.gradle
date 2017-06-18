@@ -35,6 +35,13 @@ repositories {
         name = 'spigot'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
+    maven {
+        name = 'sk89q'
+        url = "http://maven.sk89q.com/repo/"
+    }
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
@@ -46,6 +53,13 @@ dependencies {
 
     // Bukkit
     compile 'org.bukkit:bukkit:1.12-R0.1-SNAPSHOT'
+
+    // WorldGuard and WorldEdit
+    compile 'com.sk89q.worldguard:worldguard-legacy:6.2'
+    compile 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
+
+    // Towny - Add the towny jar to the libs directory
+    compile name: 'Towny'
 }
 
 def processYaml(Yaml yaml, File file) {

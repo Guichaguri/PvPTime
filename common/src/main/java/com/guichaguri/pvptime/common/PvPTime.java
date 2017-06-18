@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
 
-    public static final String VERSION = "2.0.0";
+    public static final String VERSION = "2.0.1";
 
     private final Map<D, IWorldOptions> dimensions;
     private final Map<D, Boolean> cache;

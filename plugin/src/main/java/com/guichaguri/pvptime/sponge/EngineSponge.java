@@ -1,7 +1,7 @@
 package com.guichaguri.pvptime.sponge;
 
-import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.common.PvPTime;
 import java.util.HashMap;
 import java.util.Optional;
 import org.spongepowered.api.Server;

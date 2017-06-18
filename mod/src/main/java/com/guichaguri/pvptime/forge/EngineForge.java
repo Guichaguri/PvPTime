@@ -1,7 +1,7 @@
 package com.guichaguri.pvptime.forge;
 
-import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.api.IWorldOptions;
+import com.guichaguri.pvptime.common.PvPTime;
 import gnu.trove.map.hash.THashMap;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.entity.player.EntityPlayer;
