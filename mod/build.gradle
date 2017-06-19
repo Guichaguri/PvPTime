@@ -36,6 +36,14 @@ dependencies {
     shade project(':common')
 }
 
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    from project(":common").sourceSets.main.output
+    classifier = 'DEV'
+}
+
+build.dependsOn deobfJar
+
 jar {
     configurations.shade.each { dep ->
         from(project.zipTree(dep)){
