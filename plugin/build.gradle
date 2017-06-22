@@ -4,8 +4,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-    }
-    dependencies {
         classpath 'org.yaml:snakeyaml:1.12'
     }
 }
@@ -16,6 +14,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
+apply plugin: 'signing'
 
 group 'com.guichaguri.pvptime'
 version ver
@@ -86,4 +85,8 @@ shadowJar {
     dependencies {
         include project(':common')
     }
+}
+
+signing {
+    sign project.tasks.shadowJar
 }
