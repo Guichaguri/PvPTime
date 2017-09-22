@@ -1,13 +1,13 @@
 package com.guichaguri.pvptime.forge;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.File;
+import java.util.Optional;
+import java.util.function.Function;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
@@ -80,10 +80,11 @@ public class PvPTimeForge {
     @EventHandler
     public void imc(IMCEvent event) {
         for(IMCMessage msg : event.getMessages()) {
-            if(!msg.key.equalsIgnoreCase("pvptime") || !msg.key.equalsIgnoreCase("api")) continue;
+            String key = msg.key.toLowerCase();
+            if(!key.equals("pvptime") && !key.equals("api")) continue;
 
             Optional<Function<IPvPTimeAPI, Void>> func = msg.getFunctionValue(IPvPTimeAPI.class, Void.class);
-            if(func.isPresent()) func.get().apply(engine);
+            func.ifPresent(f -> f.apply(engine));
         }
     }
 
@@ -181,7 +182,7 @@ public class PvPTimeForge {
         DamageSource source = event.getSource();
         if(source == null) return;
 
-        Entity attacker = source.getEntity();
+        Entity attacker = source.getTrueSource();
         if(attacker == null) return;
 
         Entity victim = event.getEntity();
