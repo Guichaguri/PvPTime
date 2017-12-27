@@ -8,8 +8,8 @@ public interface IPvPTimeAPI<D> {
 
     /**
      * Gets the dimension identifier
-     * Forge: The dimension id (int) is the identifier, this also accepts a World object
-     * Bukkit: The dimension name (string) is the identifier, this also accepts a World object
+     * Forge: The dimension id (int) is the identifier, this also accepts a World, WorldProvider or the dimension name (string)
+     * Bukkit: The dimension name (string) is the identifier, this also accepts a World or a UUID object
      * Sponge: The dimension name (string) is the identifier, this also accepts a World object
      *
      * @param dimension The dimension object

@@ -4,6 +4,7 @@ import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.common.PvPTime;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
@@ -87,6 +88,9 @@ public class EngineSponge extends PvPTime<String> {
     public String getDimension(Object dimension) {
         if(dimension instanceof String) {
             return (String)dimension;
+        } else if(dimension instanceof UUID) {
+            Optional<World> w = Sponge.getGame().getServer().getWorld((UUID)dimension);
+            return w.isPresent() ? w.get().getName() : null;
         } else if(dimension instanceof World) {
             return ((World)dimension).getName();
         }

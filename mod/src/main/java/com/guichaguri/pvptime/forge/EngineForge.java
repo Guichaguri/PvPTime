@@ -10,6 +10,8 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
 /**
@@ -105,8 +107,18 @@ public class EngineForge extends PvPTime<Integer> {
     public Integer getDimension(Object dimension) {
         if(dimension instanceof Integer) {
             return (Integer)dimension;
+        } else if(dimension instanceof String) {
+            String name = (String)dimension;
+            for(WorldServer w : DimensionManager.getWorlds()) {
+                if(name.equals(w.getWorldInfo().getWorldName())) {
+                    return w.provider.getDimension();
+                }
+            }
+            return null;
         } else if(dimension instanceof World) {
             return ((World)dimension).provider.getDimension();
+        } else if(dimension instanceof WorldProvider) {
+            return ((WorldProvider)dimension).getDimension();
         }
         return null;
     }
