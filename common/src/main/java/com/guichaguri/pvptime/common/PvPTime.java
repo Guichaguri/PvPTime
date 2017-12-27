@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
 
-    public static final String VERSION = "2.0.2";
+    public static final String VERSION = "2.0.3";
 
     private final Map<D, IWorldOptions> dimensions;
     private final Map<D, Boolean> cache;
@@ -41,6 +41,11 @@ public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
 
         Boolean was = cache.get(id);
         Boolean is = isRawPvPTime(id);
+
+        if(is == null) {
+            // Unloaded dimension
+            return Long.MAX_VALUE;
+        }
 
         if(was != null) {
             // Checks if the pvp time changed
