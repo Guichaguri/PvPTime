@@ -81,6 +81,8 @@ public class PvPTimeSponge implements Runnable {
                 .child(reloadCommand, "reload")
                 .build();
         Sponge.getCommandManager().register(this, command, "pvptime");
+
+        Sponge.getServiceManager().setProvider(this, IPvPTimeAPI.class, engine);
     }
 
     @Listener

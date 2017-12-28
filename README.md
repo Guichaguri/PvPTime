@@ -8,3 +8,10 @@ PvPTime for Forge, Sponge and Bukkit
 * [CurseForge](https://minecraft.curseforge.com/projects/pvptime) (Minecraft Forge)
 * [Bukkit Dev](https://dev.bukkit.org/projects/pvptime) (Bukkit/Spigot)
 * [Sponge Ore](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge)
+
+## Building
+To compile the mod, run `gradle mod:build`
+
+To compile the plugin, run `gradle plugin:shadowJar`
+
+To compile and sign the plugin, run `gradle plugin:signShadowJar`
