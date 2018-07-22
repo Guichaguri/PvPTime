@@ -1,6 +1,6 @@
 name: PvPTime
 main: com.guichaguri.pvptime.bukkit.PvPTimeBukkit
-version: 2.0.3
+version: 2.0.4
 description: Lets you choose what in-game hours you want PvP enabled.
 softdepend:
 - WorldGuard

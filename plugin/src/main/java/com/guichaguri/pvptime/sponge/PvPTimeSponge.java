@@ -9,7 +9,6 @@ import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
@@ -87,7 +86,12 @@ public class PvPTimeSponge implements Runnable {
 
     @Listener
     public void onStarted(GameStartedServerEvent event) {
-        loadConfig();
+        try {
+            loadConfig();
+        } catch(Exception ex) {
+            System.out.println("Failed to load configuration file");
+            ex.printStackTrace();
+        }
     }
 
     @Listener
@@ -116,7 +120,7 @@ public class PvPTimeSponge implements Runnable {
     protected void loadConfig() {
         if(configRoot == null) reloadConfig();
 
-        engine.setAtLeastTwoPlayers(getConfigElement(configRoot.getNode("general", "atLeastTwoPlayers"), false));
+        engine.setAtLeastTwoPlayers(getConfigElement(configRoot.getNode("general", "atLeastTwoPlayers"), false, "Messages will broadcast if there's at least two players online"));
 
         defaultOptions = new WorldOptions();
         loadWorld(configRoot.getNode("default"), defaultOptions);
@@ -140,30 +144,36 @@ public class PvPTimeSponge implements Runnable {
     }
 
     private void loadWorld(CommentedConfigurationNode root, WorldOptions o) {
-        o.setEnabled(getConfigElement(root.getNode("enabled"), o.isEnabled()));
-        o.setEngineMode(getConfigElement(root.getNode("engineMode"), o.getEngineMode()));
-        o.setTotalDayTime(getConfigElement(root.getNode("totalDayTime"), o.getTotalDayTime()));
-        o.setPvPTimeStart(getConfigElement(root.getNode("startTime"), o.getPvPTimeStart()));
-        o.setPvPTimeEnd(getConfigElement(root.getNode("endTime"), o.getPvPTimeEnd()));
-        o.setStartMessage(getConfigElement(root.getNode("startMessage"), o.getStartMessage()));
-        o.setEndMessage(getConfigElement(root.getNode("endMessage"), o.getEndMessage()));
-        o.setStartCmds(getStringList(root.getNode("startCmds"), o.getStartCmds()));
-        o.setEndCmds(getStringList(root.getNode("endCmds"), o.getEndCmds()));
+        o.setEnabled(getConfigElement(root.getNode("enabled"), o.isEnabled(), "Whether PvPTime will be disabled on this dimension"));
+        o.setEngineMode(getConfigElement(root.getNode("engineMode"), o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
+        o.setTotalDayTime(getConfigElement(root.getNode("totalDayTime"), o.getTotalDayTime(), "The total time that a Minecraft day has"));
+        o.setPvPTimeStart(getConfigElement(root.getNode("startTime"), o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled"));
+        o.setPvPTimeEnd(getConfigElement(root.getNode("endTime"), o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled"));
+        o.setStartMessage(getConfigElement(root.getNode("startMessage"), o.getStartMessage(), "Message to be broadcasted when the PvP Time starts"));
+        o.setEndMessage(getConfigElement(root.getNode("endMessage"), o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
+        o.setStartCmds(getStringList(root.getNode("startCmds"), o.getStartCmds(), "Commands to be executed when the PvPTime starts"));
+        o.setEndCmds(getStringList(root.getNode("endCmds"), o.getEndCmds(), "Commands to be executed when the PvPTime ends"));
     }
 
-    private <T> T getConfigElement(ConfigurationNode node, T def) {
+    private <T> T getConfigElement(CommentedConfigurationNode node, T def, String comment) {
+        node.setComment(comment);
+
         if(!node.isVirtual()) {
             return (T)node.getValue(def);
         }
+
         node.setValue(def);
         return def;
     }
 
-    private String[] getStringList(CommentedConfigurationNode node, String[] def) {
+    private String[] getStringList(CommentedConfigurationNode node, String[] def, String comment) {
+        node.setComment(comment);
+
         if(!node.isVirtual()) {
             List<String> list = node.getList(Object::toString);
             return list.toArray(new String[list.size()]);
         }
+
         node.setValue(Arrays.asList(def));
         return def;
     }

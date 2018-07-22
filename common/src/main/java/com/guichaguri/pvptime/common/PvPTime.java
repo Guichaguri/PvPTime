@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
 
-    public static final String VERSION = "2.0.3";
+    public static final String VERSION = "2.0.4";
 
     private final Map<D, IWorldOptions> dimensions;
     private final Map<D, Boolean> cache;
@@ -140,7 +140,12 @@ public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
         return new WorldOptions();
     }
 
+    /**
+     * Whether it requires at least two players in the server to announce messages
+     * @param atLeastTwoPlayers - {@code true} if two players need to be connected
+     */
     public void setAtLeastTwoPlayers(boolean atLeastTwoPlayers) {
         this.atLeastTwoPlayers = atLeastTwoPlayers;
     }
+
 }

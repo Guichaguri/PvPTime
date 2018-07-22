@@ -34,7 +34,7 @@ public class EngineForge extends PvPTime<Integer> {
             case 1:
                 return checkPvPTime(options, world.getWorldTime());
             case 2:
-                return world.isDaytime();
+                return !world.isDaytime();
             default:
                 return null;
         }
@@ -56,6 +56,7 @@ public class EngineForge extends PvPTime<Integer> {
                 if(w == null) break;
                 return calculateTimeLeft(options, w.getWorldTime(), isPvPTime);
             case 2:
+                // Check whether it's daytime every second
                 return 20;
         }
         return Long.MAX_VALUE;
@@ -123,7 +124,12 @@ public class EngineForge extends PvPTime<Integer> {
         return null;
     }
 
+    /**
+     * Whether it will only announce PvP updates when its a LAN or a dedicated server.
+     * @param onlyMultiplayer - {@code true} if will only announce in multiplayer
+     */
     public void setOnlyMultiplayer(boolean onlyMultiplayer) {
         this.onlyMultiplayer = onlyMultiplayer;
     }
+
 }

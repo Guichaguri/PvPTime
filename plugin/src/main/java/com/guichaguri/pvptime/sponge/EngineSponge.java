@@ -47,6 +47,8 @@ public class EngineSponge extends PvPTime<String> {
                 if(!w.isPresent()) break;
                 return calculateTimeLeft(options, w.get().getProperties().getWorldTime(), isPvPTime);
             case 2:
+                // Doesn't calculate the time left automatically
+                // instead, check for it every second
                 return 20;
         }
         return Long.MAX_VALUE;

@@ -85,6 +85,8 @@ public class EngineBukkit extends PvPTime<String> {
                 if(w == null) break;
                 return calculateTimeLeft(options, w.getFullTime(), isPvPTime);
             case 2:
+                // Doesn't calculate the time left automatically
+                // instead, check for it every second
                 return 20;
         }
         return Long.MAX_VALUE;

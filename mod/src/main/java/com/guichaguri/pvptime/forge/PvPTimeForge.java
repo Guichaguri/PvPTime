@@ -134,7 +134,7 @@ public class PvPTimeForge {
 
     private void loadDimension(Configuration config, String cat, WorldOptions o) {
         o.setEnabled(config.get(cat, "enabled", o.isEnabled(), "Whether PvPTime will be disabled on this dimension").getBoolean());
-        o.setEngineMode(config.get(cat, "engineMode", o.getEngineMode(), "1: Configurable Time | 2: Automatic | -1: PvP always disabled | 1: PvP always enabled").getInt());
+        o.setEngineMode(config.get(cat, "engineMode", o.getEngineMode(), "1: Configurable Time | 2: Automatic | -1: PvP always disabled | -2: PvP always enabled").getInt());
         o.setTotalDayTime(config.get(cat, "totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has").getInt());
         o.setPvPTimeStart(config.get(cat, "startTime", o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled").getInt());
         o.setPvPTimeEnd(config.get(cat, "endTime", o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled").getInt());
