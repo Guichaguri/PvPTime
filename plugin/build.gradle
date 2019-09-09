@@ -10,7 +10,6 @@ buildscript {
 
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
@@ -51,11 +50,12 @@ dependencies {
     compile 'org.spongepowered:spongeapi:8.0.0-SNAPSHOT'
 
     // Bukkit
-    compile 'org.bukkit:bukkit:1.13-R0.1-SNAPSHOT'
+    compile 'org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT'
 
     // WorldGuard and WorldEdit
-    compile 'com.sk89q.worldguard:worldguard-legacy:6.2'
-    compile 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
+    compile 'com.sk89q.worldguard:worldguard-core:7.0.1-SNAPSHOT'
+    compile 'com.sk89q.worldguard:worldguard-bukkit:7.0.1-SNAPSHOT'
+    compile 'com.sk89q.worldedit:worldedit-core:7.0.1-SNAPSHOT'
 
     // Towny - Add the towny jar to the libs directory
     compile name: 'Towny'
@@ -72,7 +72,7 @@ def processYaml(Yaml yaml, File file) {
 processResources {
     def options = new DumperOptions();
     options.prettyFlow = true;
-    options.defaultFlowStyle = FlowStyle.BLOCK
+    options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
     def yaml = new Yaml(options)
 
     processYaml(yaml, file("src/main/resources/plugin.yml"))

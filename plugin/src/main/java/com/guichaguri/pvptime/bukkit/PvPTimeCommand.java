@@ -1,6 +1,5 @@
 package com.guichaguri.pvptime.bukkit;
 
-
 import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.common.PvPTime;
 import org.bukkit.Bukkit;

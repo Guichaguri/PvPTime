@@ -40,7 +40,7 @@ import org.spongepowered.api.world.World;
         id = "pvptime",
         name = "PvPTime",
         version = PvPTime.VERSION,
-        description = "Lets you choose what in-game hours you want PvP enabled.",
+        description = "Lets you choose what in-game time you want PvP enabled.",
         url = "http://guichaguri.com",
         authors = "Guichaguri"
 )

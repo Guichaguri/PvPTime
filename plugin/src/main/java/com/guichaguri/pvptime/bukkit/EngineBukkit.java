@@ -3,12 +3,15 @@ package com.guichaguri.pvptime.bukkit;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.common.PvPTime;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.HashMap;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -35,14 +38,34 @@ public class EngineBukkit extends PvPTime<String> {
         towny = manager.getPlugin("Towny");
     }
 
+    private boolean isWorldGuardPvPForced(Location loc) {
+        World world = loc.getWorld();
+        if(world == null) return false;
+
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionManager manager = container.get(BukkitAdapter.adapt(loc.getWorld()));
+        if(manager == null) return false;
+
+        ApplicableRegionSet set = manager.getApplicableRegions(BukkitAdapter.asBlockVector(loc));
+
+        for(ProtectedRegion region : set) {
+            // region.getFlag(Flags.PVP) leads to runtime errors for whatever reason
+            if(region.getFlags().get(Flags.PVP) == State.ALLOW) return true;
+        }
+
+        return false;
+    }
+
     private boolean isPvPForced(Location loc) {
         if(worldguard != null) {
-            WorldGuardPlugin wg = (WorldGuardPlugin)worldguard;
-            ApplicableRegionSet set = wg.getRegionManager(loc.getWorld()).getApplicableRegions(loc);
-
-            for(ProtectedRegion region : set) {
-                // region.getFlag(DefaultFlag.PVP) leads to runtime errors for whatever reason
-                if(region.getFlags().get(DefaultFlag.PVP) == State.ALLOW) return true;
+            try {
+                return isWorldGuardPvPForced(loc);
+            } catch(Exception ex) {
+                // May happen when the WorldGuard API changes
+                worldguard = null;
+                System.out.println("Couldn't check whether the PvP is forced on WorldGuard.");
+                System.out.println("The integration has been disabled for now.");
+                ex.printStackTrace();
             }
         }
 
@@ -53,7 +76,15 @@ public class EngineBukkit extends PvPTime<String> {
         if(isPvPForced(attacker) && isPvPForced(victim)) return true;
 
         if(towny != null) {
-            if(TownyUniverse.isWarTime()) return true;
+            try {
+                if (TownyUniverse.isWarTime()) return true;
+            } catch(Exception ex) {
+                // May happen when the Towny API changes
+                towny = null;
+                System.out.println("Couldn't check whether the PvP is forced on Towny.");
+                System.out.println("The integration has been disabled for now.");
+                ex.printStackTrace();
+            }
         }
 
         return false;
@@ -125,9 +156,13 @@ public class EngineBukkit extends PvPTime<String> {
     @Override
     public String getDimension(Object dimension) {
         if(dimension instanceof String) {
+
             return (String)dimension;
+
         } else if(dimension instanceof World) {
+
             return ((World)dimension).getName();
+
         }
         return null;
     }

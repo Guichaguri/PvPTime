@@ -89,12 +89,18 @@ public class EngineSponge extends PvPTime<String> {
     @Override
     public String getDimension(Object dimension) {
         if(dimension instanceof String) {
+
             return (String)dimension;
+
         } else if(dimension instanceof UUID) {
+
             Optional<World> w = Sponge.getGame().getServer().getWorld((UUID)dimension);
             return w.isPresent() ? w.get().getName() : null;
+
         } else if(dimension instanceof World) {
+
             return ((World)dimension).getName();
+
         }
         return null;
     }
