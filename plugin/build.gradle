@@ -1,92 +1,89 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-        classpath 'org.yaml:snakeyaml:1.12'
-    }
+plugins {
+    id 'java'
+    id 'signing'
+    id 'com.gradleup.shadow' version '8.3.0'
 }
 
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.DumperOptions
+group = 'com.guichaguri.pvptime'
+version = ver
 
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
-apply plugin: 'signing'
-
-group 'com.guichaguri.pvptime'
-version ver
-
-sourceCompatibility = targetCompatibility = "1.8"
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 repositories {
-    jcenter()
+    mavenCentral()
+
     maven {
         name = 'sponge'
-        url = 'http://repo.spongepowered.org/maven'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
     }
     maven {
         name = 'spigot'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
-        name = 'sk89q'
-        url = "http://maven.sk89q.com/repo/"
+        name = 'enginehub'
+        url = 'https://maven.enginehub.org/repo/'
     }
-    flatDir {
-        dirs 'libs'
+    maven {
+        name = 'glaremasters-towny'
+        url = 'https://repo.glaremasters.me/repository/towny/'
+    }
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
     }
 }
 
 dependencies {
     // Common
-    compile project(':common')
+    implementation project(':common')
 
     // Sponge
-    compile 'org.spongepowered:spongeapi:8.0.0-SNAPSHOT'
+    compileOnly 'org.spongepowered:spongeapi:17.0.0'
 
     // Bukkit
-    compile 'org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT'
 
     // WorldGuard and WorldEdit
-    compile 'com.sk89q.worldguard:worldguard-core:7.0.1-SNAPSHOT'
-    compile 'com.sk89q.worldguard:worldguard-bukkit:7.0.1-SNAPSHOT'
-    compile 'com.sk89q.worldedit:worldedit-core:7.0.1-SNAPSHOT'
+    compileOnly ('com.sk89q.worldguard:worldguard-core:7.0.17-SNAPSHOT') {
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.17-SNAPSHOT') {
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
 
-    // Towny - Add the towny jar to the libs directory
-    compile name: 'Towny'
-}
-
-def processYaml(Yaml yaml, File file) {
-    println("Updating version from " + file.name)
-
-    def data = (Map)yaml.load(file.text)
-    data.put("version", ver);
-    file.text = yaml.dump(data)
-}
-
-processResources {
-    def options = new DumperOptions();
-    options.prettyFlow = true;
-    options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-    def yaml = new Yaml(options)
-
-    processYaml(yaml, file("src/main/resources/plugin.yml"))
-}
-
-shadowJar {
-    baseName = 'PvPTime-Plugin'
-    classifier = null
-
-    dependencies {
-        include project(':common')
+    // Towny
+    compileOnly 'com.palmergames.bukkit.towny:towny:0.103.0.6'
+    compileOnly 'com.github.TownyAdvanced:FlagWar:0.8.1'
+    compileOnly('com.github.TownyAdvanced:SiegeWar:3.6.1') {
+        exclude group: 'us.dynmap', module: 'dynmap-api'
     }
 }
 
+// Built-in Gradle resource filtering (replaces the SnakeYAML workaround)
+// To use this, change your src/main/resources/plugin.yml version line to:
+// version: '${version}'
+processResources {
+    def props = [version: project.version]
+    inputs.properties props
+    filteringCharset = 'UTF-8'
+
+    filesMatching('plugin.yml') {
+        expand props
+    }
+
+    filesMatching('META-INF/sponge_plugins.json') {
+        expand props
+    }
+}
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveClassifier = ''
+    archiveBaseName = 'PvPTime'
+}
+
 signing {
-    sign project.tasks.shadowJar
+    sign tasks.named('shadowJar').get()
 }

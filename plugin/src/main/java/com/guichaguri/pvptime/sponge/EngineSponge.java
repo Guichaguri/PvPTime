@@ -2,50 +2,53 @@ package com.guichaguri.pvptime.sponge;
 
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.common.PvPTime;
-import java.util.HashMap;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 
 /**
  * @author Guilherme Chaguri
  */
-public class EngineSponge extends PvPTime<String> {
-    public EngineSponge() {
-        super(new HashMap<>(), new HashMap<>());
+public class EngineSponge extends PvPTime<ResourceKey> {
+    private final Logger logger;
+
+    public EngineSponge(Logger logger) {
+        super();
+        this.logger = logger;
     }
 
     @Override
-    protected Boolean isRawPvPTime(String dimension, IWorldOptions options) {
-        Optional<World> world = Sponge.getGame().getServer().getWorld(dimension);
-        if(!world.isPresent()) return null;
+    protected Boolean isRawPvPTime(ResourceKey dimension, IWorldOptions options) {
+        Optional<ServerWorld> world = Sponge.server().worldManager().world(dimension);
+        if(world.isEmpty()) return null;
 
-        switch(options.getEngineMode()) {
-            case -2:
-                return true; // PvP always enabled on engine mode -2
-            case -1:
-                return false; // PvP always disabled on engine mode -1
-            case 1:
-            case 2:
-                return checkPvPTime(options, world.get().getProperties().getWorldTime());
-            default:
-                return null;
-        }
+        return switch (options.getEngineMode()) {
+            case -2 -> true; // PvP always enabled on engine mode -2
+            case -1 -> false; // PvP always disabled on engine mode -1
+            case 1, 2 -> checkPvPTime(options, world.get().properties().dayTime().asTicks().ticks());
+            default -> null;
+        };
     }
 
     @Override
-    protected long getTimeLeft(String dimension, IWorldOptions options, boolean isPvPTime) {
+    protected long getTimeLeft(ResourceKey dimension, IWorldOptions options, boolean isPvPTime) {
         switch(options.getEngineMode()) {
             case 1:
-                Optional<World> w = Sponge.getGame().getServer().getWorld(dimension);
-                if(!w.isPresent()) break;
-                return calculateTimeLeft(options, w.get().getProperties().getWorldTime(), isPvPTime);
+                Optional<ServerWorld> w = Sponge.server().worldManager().world(dimension);
+                if(w.isEmpty()) break;
+                return calculateTimeLeft(options, w.get().properties().dayTime().asTicks().ticks(), isPvPTime);
             case 2:
                 // Doesn't calculate the time left automatically
                 // instead, check for it every second
@@ -55,18 +58,23 @@ public class EngineSponge extends PvPTime<String> {
     }
 
     @Override
-    protected void announce(String dimension, IWorldOptions options, boolean isPvPTime) {
-        Server server = Sponge.getGame().getServer();
-        Optional<World> w = server.getWorld(dimension);
-        if(!w.isPresent()) return;
+    protected void announce(ResourceKey dimension, IWorldOptions options, boolean isPvPTime) {
+        Server server = Sponge.server();
+        Optional<ServerWorld> w = server.worldManager().world(dimension);
+        if(w.isEmpty()) return;
 
-        String[] cmds = isPvPTime ? options.getStartCmds() : options.getEndCmds();
+        List<String> cmds = isPvPTime ? options.getStartCommands() : options.getEndCommands();
 
         // Runs the commands if any
-        if(cmds != null && cmds.length > 0) {
-            CommandManager manager = Sponge.getCommandManager();
-            CommandSource source = server.getConsole();
-            for(String cmd : cmds) manager.process(source, cmd);
+        if(cmds != null && !cmds.isEmpty()) {
+            CommandManager manager = server.commandManager();
+            for(String cmd : cmds) {
+                try {
+                    manager.process(cmd);
+                } catch (CommandException ex) {
+                    logger.error("Failed to run the command", ex);
+                }
+            }
         }
 
         String msg = isPvPTime ? options.getStartMessage() : options.getEndMessage();
@@ -76,30 +84,39 @@ public class EngineSponge extends PvPTime<String> {
 
         if(atLeastTwoPlayers) {
             // Only announces when there are at least two players online
-            if(server.getOnlinePlayers().size() < 2) return;
+            if(server.onlinePlayers().size() < 2) return;
         }
 
         // Creates the text component, converting all color codes
-        Text c = Text.of(msg.replaceAll("&([0-9a-fk-or])", "\u00a7$1"));
+        Component c;
+        try {
+            c = MiniMessage.miniMessage().deserialize(msg);
+        } catch (Exception ex) {
+            logger.warn("Failed to deserialize MiniMessage", ex);
+            c = Component.text(msg);
+        }
 
         // Sends the message for all players in the dimension
-        for(Player p : w.get().getPlayers()) p.sendMessage(c);
+        for(Player p : w.get().players()) p.sendMessage(c);
     }
 
     @Override
-    public String getDimension(Object dimension) {
-        if(dimension instanceof String) {
+    public ResourceKey getDimension(Object dimension) {
+        if(dimension instanceof ResourceKey) {
 
-            return (String)dimension;
+            return (ResourceKey) dimension;
+
+        } else if(dimension instanceof String) {
+
+            return ResourceKey.resolve((String) dimension);
 
         } else if(dimension instanceof UUID) {
 
-            Optional<World> w = Sponge.getGame().getServer().getWorld((UUID)dimension);
-            return w.isPresent() ? w.get().getName() : null;
+            return Sponge.server().worldManager().worldKey((UUID) dimension).orElse(null);
 
-        } else if(dimension instanceof World) {
+        } else if(dimension instanceof ServerWorld) {
 
-            return ((World)dimension).getName();
+            return ((ServerWorld) dimension).key();
 
         }
         return null;

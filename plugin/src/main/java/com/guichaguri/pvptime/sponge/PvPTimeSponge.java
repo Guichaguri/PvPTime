@@ -4,107 +4,122 @@ import com.google.inject.Inject;
 import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
-import com.guichaguri.pvptime.common.PvPTime;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.game.state.GameStoppingEvent;
+import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
+import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 /**
  * @author Guilherme Chaguri
  */
-@Plugin(
-        id = "pvptime",
-        name = "PvPTime",
-        version = PvPTime.VERSION,
-        description = "Lets you choose what in-game time you want PvP enabled.",
-        url = "http://guichaguri.com",
-        authors = "Guichaguri"
-)
+@Plugin("pvptime")
 public class PvPTimeSponge implements Runnable {
 
-    private EngineSponge engine;
+    @Inject
+    private PluginContainer container;
+
+    @Inject
+    private Logger logger;
 
     @Inject
     @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> config;
+    private ConfigurationLoader<@NotNull CommentedConfigurationNode> config;
     private CommentedConfigurationNode configRoot;
+
+    private EngineSponge engine;
 
     private WorldOptions defaultOptions;
 
-    private Task task;
+    private ScheduledTask task;
 
     @Listener
-    public void onInit(GamePreInitializationEvent event) {
-        engine = new EngineSponge();
-        PvPTimeAPI.setAPI(engine);
-
+    public void onRegisterCommands(RegisterCommandEvent<Command.Parameterized> event) {
         PvPTimeCommand executor = new PvPTimeCommand(this);
 
-        CommandSpec infoCommand = CommandSpec.builder()
+        Command.Parameterized infoCommand = Command.builder()
                 .permission("pvptime.info")
                 .executor(executor::info)
                 .build();
-        CommandSpec reloadCommand = CommandSpec.builder()
+        Command.Parameterized reloadCommand = Command.builder()
                 .permission("pvptime.reload")
                 .executor(executor::reload)
                 .build();
 
-        CommandSpec command = CommandSpec.builder()
+        Command.Parameterized command = Command.builder()
                 .permission("pvptime.info")
                 .executor(executor)
-                .child(infoCommand, "info")
-                .child(reloadCommand, "reload")
+                .addChild(infoCommand, "info")
+                .addChild(reloadCommand, "reload")
                 .build();
-        Sponge.getCommandManager().register(this, command, "pvptime");
 
-        Sponge.getServiceManager().setProvider(this, IPvPTimeAPI.class, engine);
+        event.register(this.container, command, "pvptime");
     }
 
     @Listener
-    public void onStarted(GameStartedServerEvent event) {
+    public void providePvPTimeEngine(ProvideServiceEvent.EngineScoped<IPvPTimeAPI<?>, Server> event) {
+        event.suggest(() -> engine);
+    }
+
+    @Listener
+    public void onStarted(StartingEngineEvent<Server> event) {
+        engine = new EngineSponge(logger);
+        PvPTimeAPI.setAPI(engine);
+
         try {
             loadConfig();
         } catch(Exception ex) {
-            System.out.println("Failed to load configuration file");
-            ex.printStackTrace();
+            logger.error("Failed to load configuration file", ex);
         }
     }
 
     @Listener
-    public void onStop(GameStoppingEvent event) {
+    public void onStop(StoppingEngineEvent<Server> event) {
         try {
             // Saves the config file
             config.save(configRoot);
         } catch(IOException ex) {
-            ex.printStackTrace();
+            logger.error("Error saving the config", ex);
+        }
+
+        if (task != null) {
+            task.cancel();
+            task = null;
         }
     }
 
-    public IPvPTimeAPI<String> getAPI() {
+    public IPvPTimeAPI<ResourceKey> getAPI() {
         return engine;
     }
 
@@ -112,7 +127,7 @@ public class PvPTimeSponge implements Runnable {
         try {
             configRoot = config.load();
         } catch(IOException ex) {
-            configRoot = config.createEmptyNode();
+            configRoot = config.createNode();
         }
         engine.resetWorldOptions();
     }
@@ -120,61 +135,78 @@ public class PvPTimeSponge implements Runnable {
     protected void loadConfig() {
         if(configRoot == null) reloadConfig();
 
-        engine.setAtLeastTwoPlayers(getConfigElement(configRoot.getNode("general", "atLeastTwoPlayers"), false, "Messages will broadcast if there's at least two players online"));
+        engine.setAtLeastTwoPlayers(getConfigElement(configRoot.node("general", "atLeastTwoPlayers"), false, "Messages will broadcast if there's at least two players online"));
 
         defaultOptions = new WorldOptions();
-        loadWorld(configRoot.getNode("default"), defaultOptions);
+        defaultOptions.setStartMessage("<red>It's night and PvP is turned on</red>");
+        defaultOptions.setEndMessage("<green>It's daytime and PvP is turned off</green>");
+        loadWorld(configRoot.node("default"), defaultOptions);
 
-        for(World world : Sponge.getServer().getWorlds()) {
+        for(ServerWorld world : Sponge.server().worldManager().worlds()) {
             loadWorld(defaultOptions, world);
         }
 
         updateTimer(engine.update());
     }
 
-    private void loadWorld(WorldOptions defaultOptions, World world) {
-        boolean isSurface = world.getDimension().getType() == DimensionTypes.OVERWORLD;
+    private void loadWorld(WorldOptions defaultOptions, ServerWorld world) {
+        boolean isSurface = world.worldType().hasSkylight();
 
         WorldOptions def = new WorldOptions(defaultOptions);
         def.setEnabled(isSurface || def.isEnabled());
 
-        loadWorld(configRoot.getNode("world", world.getName()), def);
+        loadWorld(configRoot.node("world", world.key().asString()), def);
 
-        engine.setWorldOptions(world.getName(), def);
+        engine.setWorldOptions(world.key(), def);
     }
 
     private void loadWorld(CommentedConfigurationNode root, WorldOptions o) {
-        o.setEnabled(getConfigElement(root.getNode("enabled"), o.isEnabled(), "Whether PvPTime will be disabled on this dimension"));
-        o.setEngineMode(getConfigElement(root.getNode("engineMode"), o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
-        o.setTotalDayTime(getConfigElement(root.getNode("totalDayTime"), o.getTotalDayTime(), "The total time that a Minecraft day has"));
-        o.setPvPTimeStart(getConfigElement(root.getNode("startTime"), o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled"));
-        o.setPvPTimeEnd(getConfigElement(root.getNode("endTime"), o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled"));
-        o.setStartMessage(getConfigElement(root.getNode("startMessage"), o.getStartMessage(), "Message to be broadcasted when the PvP Time starts"));
-        o.setEndMessage(getConfigElement(root.getNode("endMessage"), o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
-        o.setStartCmds(getStringList(root.getNode("startCmds"), o.getStartCmds(), "Commands to be executed when the PvPTime starts"));
-        o.setEndCmds(getStringList(root.getNode("endCmds"), o.getEndCmds(), "Commands to be executed when the PvPTime ends"));
+        o.setEnabled(getConfigElement(root.node("enabled"), o.isEnabled(), "Whether PvPTime will be disabled on this dimension"));
+        o.setEngineMode(getConfigElement(root.node("engineMode"), o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
+        o.setTotalDayTime(getConfigElement(root.node("totalDayTime"), o.getTotalDayTime(), "The total time that a Minecraft day has"));
+        o.setPvPTimeStart(getConfigElement(root.node("startTime"), o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled"));
+        o.setPvPTimeEnd(getConfigElement(root.node("endTime"), o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled"));
+        o.setStartMessage(getConfigElement(root.node("startMessage"), o.getStartMessage(), "Message to be broadcasted when the PvP Time starts"));
+        o.setEndMessage(getConfigElement(root.node("endMessage"), o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
+        o.setStartCommands(getStringList(root.node("startCmds"), o.getStartCommands(), "Commands to be executed when the PvPTime starts"));
+        o.setEndCommands(getStringList(root.node("endCmds"), o.getEndCommands(), "Commands to be executed when the PvPTime ends"));
     }
 
     private <T> T getConfigElement(CommentedConfigurationNode node, T def, String comment) {
-        node.setComment(comment);
+        node.comment(comment);
 
-        if(!node.isVirtual()) {
-            return (T)node.getValue(def);
+        if(!node.virtual()) {
+            try {
+                return (T) node.get(def.getClass(), def);
+            } catch (Exception ex) {
+                logger.warn("Invalid config value", ex);
+            }
         }
 
-        node.setValue(def);
+        try {
+            node.set(def.getClass(), def);
+        } catch (Exception ex) {
+            logger.warn("Failed to save config value", ex);
+        }
         return def;
     }
 
-    private String[] getStringList(CommentedConfigurationNode node, String[] def, String comment) {
-        node.setComment(comment);
+    private List<String> getStringList(CommentedConfigurationNode node, List<String> def, String comment) {
+        node.comment(comment);
 
-        if(!node.isVirtual()) {
-            List<String> list = node.getList(Object::toString);
-            return list.toArray(new String[list.size()]);
+        if(!node.virtual()) {
+            try {
+                return node.getList(String.class);
+            } catch (Exception ex) {
+                logger.warn("Invalid config value", ex);
+            }
         }
 
-        node.setValue(Arrays.asList(def));
+        try {
+            node.setList(String.class, def);
+        } catch (Exception ex) {
+            logger.warn("Failed to save config value", ex);
+        }
         return def;
     }
 
@@ -182,7 +214,13 @@ public class PvPTimeSponge implements Runnable {
         if(timeLeft <= 0) timeLeft = 1; // Prevents the server from freezing if something goes wrong
 
         if(task != null) task.cancel();
-        task = Sponge.getScheduler().createTaskBuilder().delayTicks(timeLeft).execute(this).submit(this);
+
+        task = Sponge.asyncScheduler().submit(Task.builder()
+                .execute(this)
+                .plugin(container)
+                .delay(Ticks.of(timeLeft))
+                .build()
+        );
     }
 
     @Override
@@ -192,33 +230,35 @@ public class PvPTimeSponge implements Runnable {
     }
 
     @Listener(order = Order.BEFORE_POST)
-    public void onCommand(SendCommandEvent event) {
+    public void onCommand(ExecuteCommandEvent event) {
         // Force an update when a command is triggered
         // This prevents time commands from messing up the ticks count
         updateTimer(2);
     }
 
     @Listener(order = Order.LAST)
-    public void onDamage(DamageEntityEvent event, @First EntityDamageSource source) {
-        Entity victim = event.getTargetEntity();
-        if(!(victim instanceof Player)) return;
+    public void onDamage(DamageEntityEvent event, @First DamageSource source) {
+        Entity victim = event.entity();
+        if(!(victim instanceof ServerPlayer)) return;
 
-        Entity attacker = source.getSource();
-        Player player = null;
+        Entity attacker = source.indirectSource().or(source::source).orElse(null);
+        ServerPlayer player = null;
 
-        if(attacker instanceof Player) {
-            player = (Player)attacker;
+        if (attacker == null) return;
+
+        if(attacker instanceof ServerPlayer) {
+            player = (ServerPlayer)attacker;
         } else if(attacker instanceof Projectile) {
-            ProjectileSource shooter = ((Projectile)attacker).getShooter();
-            if(shooter instanceof Player) player = (Player)shooter;
+            Value.Mutable<ProjectileSource> shooter = ((Projectile)attacker).shooter().orElse(null);
+            if(shooter != null && shooter.get() instanceof ServerPlayer) player = (ServerPlayer)shooter;
         }
 
         if(player == null) return;
 
         // Player shot himself?
-        if(player.getUniqueId().equals(victim.getUniqueId())) return;
+        if(player.uniqueId().equals(victim.uniqueId())) return;
 
-        if(((Player)victim).hasPermission("pvptime.nopvp")) {
+        if(((ServerPlayer)victim).hasPermission("pvptime.nopvp")) {
             // The victim has the permission to disable pvp even in night time
             event.setCancelled(true);
             return;
@@ -227,7 +267,7 @@ public class PvPTimeSponge implements Runnable {
             return;
         }
 
-        Boolean isPvPTime = engine.isPvPTime(victim.getWorld().getName());
+        Boolean isPvPTime = engine.isPvPTime(((ServerPlayer)victim).world().key());
 
         // Cancel the event when it's not pvp time
         if(isPvPTime != null && !isPvPTime) {
@@ -237,8 +277,8 @@ public class PvPTimeSponge implements Runnable {
 
     @Listener(order = Order.BEFORE_POST)
     public void onWorldLoad(LoadWorldEvent event) {
-        World world = event.getTargetWorld();
-        IWorldOptions options = engine.getWorldOptions(world.getName());
+        ServerWorld world = event.world();
+        IWorldOptions options = engine.getWorldOptions(world.key());
 
         if(options == null) {
             if(defaultOptions == null) loadConfig();

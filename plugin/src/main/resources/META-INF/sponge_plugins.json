@@ -1,0 +1,33 @@
+{
+  "loader": {
+    "name": "java_plain",
+    "version": "1.0"
+  },
+  "license": "GPL-2.0",
+  "plugins": [
+    {
+      "id": "pvptime",
+      "entrypoint": "com.guichaguri.pvptime.sponge.PvPTimeSponge",
+      "name": "PvPTime",
+      "description": "Lets you choose what in-game time you want PvP enabled.",
+      "version": "${version}",
+      "branding": {},
+      "links": {
+        "source": "https://github.com/Guichaguri/PvPTime"
+      },
+      "contributors": [
+        {
+          "name": "Guichaguri",
+          "description": "Lead Developer"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "spongeapi",
+          "version": "17.0.0",
+          "optional": false
+        }
+      ]
+    }
+  ]
+}
