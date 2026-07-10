@@ -90,6 +90,8 @@ public class PvPTimeNeoForge {
 
     public void imc(InterModProcessEvent event) {
         for(InterModComms.IMCMessage msg : event.getIMCStream().toList()) {
+            if (!msg.modId().equals("pvptime")) continue;
+
             String key = msg.method().toLowerCase();
             if(!key.equals("pvptime") && !key.equals("api")) continue;
 
