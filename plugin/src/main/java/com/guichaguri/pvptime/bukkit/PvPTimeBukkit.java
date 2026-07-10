@@ -147,7 +147,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         Entity victim = event.getEntity();
 
         // The victim is not a player
-        if(!(victim instanceof Player)) return;
+        if(!(victim instanceof Player victimPlayer)) return;
 
         Player attackerPlayer = null;
 
@@ -162,11 +162,11 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         if(attackerPlayer == null) return;
 
         // Player shot itself?
-        if(attackerPlayer.getUniqueId().equals(victim.getUniqueId())) return;
+        if(attackerPlayer.getUniqueId().equals(victimPlayer.getUniqueId())) return;
 
-        if(engine.isPvPForced(attackerPlayer.getLocation(), victim.getLocation())) return;
+        if(engine.isPvPForced(attackerPlayer.getLocation(), victimPlayer.getLocation())) return;
 
-        if(victim.hasPermission("pvptime.nopvp")) {
+        if(victimPlayer.hasPermission("pvptime.nopvp")) {
             // The victim has the permission to disable pvp even in night time
             event.setCancelled(true);
             return;
@@ -175,7 +175,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
             return;
         }
 
-        Boolean isPvPTime = engine.isPvPTime(victim.getWorld().getName());
+        Boolean isPvPTime = engine.isPvPTime(victimPlayer.getWorld().getName());
 
         // Cancel the event when it's not pvp time
         if(isPvPTime != null && !isPvPTime) {
@@ -188,17 +188,15 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         ThrownPotion potion = event.getPotion();
 
         ProjectileSource source = potion.getShooter();
-        if(!(source instanceof Player)) return;
-
-        Player attacker = (Player)source;
+        if(!(source instanceof Player attacker)) return;
 
         for(LivingEntity entity : event.getAffectedEntities()) {
             // Ignore entities that are not players
-            if(!(entity instanceof Player)) continue;
+            if(!(entity instanceof Player victim)) continue;
 
-            if(engine.isPvPForced(attacker.getLocation(), entity.getLocation())) continue;
+            if(engine.isPvPForced(attacker.getLocation(), victim.getLocation())) continue;
 
-            if(entity.hasPermission("pvptime.nopvp")) {
+            if(victim.hasPermission("pvptime.nopvp")) {
                 // The victim has the permission to disable pvp even in night time
                 event.setCancelled(true);
                 continue;
@@ -207,7 +205,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
                 continue;
             }
 
-            Boolean isPvPTime = engine.isPvPTime(entity.getWorld().getName());
+            Boolean isPvPTime = engine.isPvPTime(victim.getWorld().getName());
 
             // Cancel the event when it's not pvp time
             if(isPvPTime != null && !isPvPTime) {
