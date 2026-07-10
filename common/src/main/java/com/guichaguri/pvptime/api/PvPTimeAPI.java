@@ -6,13 +6,14 @@ package com.guichaguri.pvptime.api;
  */
 public class PvPTimeAPI {
 
-    private static IPvPTimeAPI api;
+    private static IPvPTimeAPI<?> api;
 
-    public static IPvPTimeAPI getAPI() {
-        return api;
+    public static <T> IPvPTimeAPI<T> getAPI() {
+        //noinspection unchecked
+        return (IPvPTimeAPI<T>) api;
     }
 
-    public static void setAPI(IPvPTimeAPI instance) {
+    public static void setAPI(IPvPTimeAPI<?> instance) {
         api = instance;
     }
 

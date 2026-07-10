@@ -2,6 +2,10 @@ package com.guichaguri.pvptime.common;
 
 import com.guichaguri.pvptime.api.IWorldOptions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class WorldOptions implements IWorldOptions {
 
     private boolean enabled = false;
@@ -11,15 +15,24 @@ public class WorldOptions implements IWorldOptions {
     private int pvptimeEnd = 500;
     private String startMessage = "&cIt's night and PvP is turned on";
     private String endMessage = "&aIt's daytime and PvP is turned off";
-    private String[] startCmds = new String[0];
-    private String[] endCmds = new String[0];
+    private List<String> startCmds = new ArrayList<>();
+    private List<String> endCmds = new ArrayList<>();
 
     public WorldOptions(boolean enabled, int engineMode, int totalDayTime, int pvptimeStart, int pvptimeEnd,
-                        String startMessage, String endMessage, String[] startCmds, String[] endCmds) {
+                        String startMessage, String endMessage, List<String> startCmds, List<String> endCmds) {
         this(enabled, engineMode, pvptimeStart, pvptimeEnd, startMessage, endMessage);
         this.totalDayTime = totalDayTime;
         this.startCmds = startCmds;
         this.endCmds = endCmds;
+    }
+
+    @Deprecated
+    public WorldOptions(boolean enabled, int engineMode, int totalDayTime, int pvptimeStart, int pvptimeEnd,
+                        String startMessage, String endMessage, String[] startCmds, String[] endCmds) {
+        this(enabled, engineMode, pvptimeStart, pvptimeEnd, startMessage, endMessage);
+        this.totalDayTime = totalDayTime;
+        this.startCmds = Arrays.stream(startCmds).toList();
+        this.endCmds = Arrays.stream(endCmds).toList();
     }
 
     public WorldOptions(boolean enabled, int engineMode, int pvptimeStart, int pvptimeEnd, String startMessage, String endMessage) {
@@ -35,7 +48,7 @@ public class WorldOptions implements IWorldOptions {
         this(o.isEnabled(), o.getEngineMode(),
                 o.getTotalDayTime(), o.getPvPTimeStart(), o.getPvPTimeEnd(),
                 o.getStartMessage(), o.getEndMessage(),
-                o.getStartCmds(), o.getEndCmds());
+                o.getStartCommands(), o.getEndCommands());
     }
 
     public WorldOptions() {}
@@ -101,22 +114,22 @@ public class WorldOptions implements IWorldOptions {
     }
 
     @Override
-    public String[] getStartCmds() {
+    public List<String> getStartCommands() {
         return startCmds;
     }
 
     @Override
-    public void setStartCmds(String[] startCmds) {
+    public void setStartCommands(List<String> startCmds) {
         this.startCmds = startCmds;
     }
 
     @Override
-    public String[] getEndCmds() {
+    public List<String> getEndCommands() {
         return endCmds;
     }
 
     @Override
-    public void setEndCmds(String[] endCmds) {
+    public void setEndCommands(List<String> endCmds) {
         this.endCmds = endCmds;
     }
 

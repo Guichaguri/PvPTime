@@ -2,6 +2,8 @@ package com.guichaguri.pvptime.common;
 
 import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,6 +17,10 @@ public abstract class PvPTime<D> implements IPvPTimeAPI<D> {
     private final Map<D, Boolean> cache;
 
     protected boolean atLeastTwoPlayers = false;
+
+    public PvPTime() {
+        this(new HashMap<>(), new HashMap<>());
+    }
 
     public PvPTime(Map<D, IWorldOptions> dimensions, Map<D, Boolean> cache) {
         this.dimensions = dimensions;

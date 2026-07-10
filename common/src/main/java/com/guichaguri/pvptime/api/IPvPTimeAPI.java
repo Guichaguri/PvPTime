@@ -8,9 +8,9 @@ public interface IPvPTimeAPI<D> {
 
     /**
      * Gets the dimension identifier
-     * Forge: The dimension id (int) is the identifier, this also accepts a World, WorldProvider or the dimension name (string)
+     * NeoForge: The dimension name (ResourceKey) is the identifier, this also accepts a Level, a DimensionType or a string
      * Bukkit: The dimension name (string) is the identifier, this also accepts a World or a UUID object
-     * Sponge: The dimension name (string) is the identifier, this also accepts a World object
+     * Sponge: The dimension name (ResourceKey) is the identifier, this also accepts a ServerWorld object, a string or a UUID object
      *
      * @param dimension The dimension object
      * @return The dimension identifier

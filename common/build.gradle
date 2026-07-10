@@ -1,9 +1,8 @@
-group 'com.guichaguri.pvptime'
-version ver
-
-apply plugin: 'java'
-
-sourceCompatibility = targetCompatibility = "1.8"
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
+plugins {
+    id 'java'
 }
+
+group = 'com.guichaguri.pvptime'
+version = ver
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
