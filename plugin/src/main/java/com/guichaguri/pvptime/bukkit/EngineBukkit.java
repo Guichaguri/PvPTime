@@ -1,8 +1,10 @@
 package com.guichaguri.pvptime.bukkit;
 
+import com.gmail.goosius.siegewar.SiegeWarAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.common.PvPTime;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Town;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
@@ -10,8 +12,12 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.util.HashMap;
+
+import java.util.List;
+import java.util.UUID;
+
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import io.github.townyadvanced.flagwar.FlagWarAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,10 +31,9 @@ import org.bukkit.plugin.PluginManager;
  */
 public class EngineBukkit extends PvPTime<String> {
 
-    private Plugin worldguard, towny;
+    private Plugin worldguard, towny, flagWar, siegeWar;
 
     public EngineBukkit() {
-        super(new HashMap<>(), new HashMap<>());
         prepareDependencies();
     }
 
@@ -36,6 +41,8 @@ public class EngineBukkit extends PvPTime<String> {
         PluginManager manager = Bukkit.getServer().getPluginManager();
         worldguard = manager.getPlugin("WorldGuard");
         towny = manager.getPlugin("Towny");
+        flagWar = manager.getPlugin("FlagWar");
+        siegeWar = manager.getPlugin("SiegeWar");
     }
 
     private boolean isWorldGuardPvPForced(Location loc) {
@@ -56,10 +63,44 @@ public class EngineBukkit extends PvPTime<String> {
         return false;
     }
 
+    private boolean isTownyPvPForced(Location loc) {
+        Town town = TownyAPI.getInstance().getTown(loc);
+        if (town == null) return false;
+
+        // If the town has an active war
+        if (town.hasActiveWar()) return true;
+
+        if(flagWar != null) {
+            try {
+                if (FlagWarAPI.isUnderAttack(town)) return true;
+            } catch(Exception ex) {
+                // May happen when the Towny API changes
+                flagWar = null;
+                System.out.println("Couldn't check whether the town is under attack on FlagWar.");
+                System.out.println("The integration has been disabled for now.");
+                ex.printStackTrace();
+            }
+        }
+
+        if(siegeWar != null) {
+            try {
+                if (SiegeWarAPI.hasActiveSiege(town)) return true;
+            } catch(Exception ex) {
+                // May happen when the Towny API changes
+                siegeWar = null;
+                System.out.println("Couldn't check whether a siege is active on SiegeWar.");
+                System.out.println("The integration has been disabled for now.");
+                ex.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
     private boolean isPvPForced(Location loc) {
         if(worldguard != null) {
             try {
-                return isWorldGuardPvPForced(loc);
+                if (isWorldGuardPvPForced(loc)) return true;
             } catch(Exception ex) {
                 // May happen when the WorldGuard API changes
                 worldguard = null;
@@ -69,15 +110,9 @@ public class EngineBukkit extends PvPTime<String> {
             }
         }
 
-        return false;
-    }
-
-    protected boolean isPvPForced(Location attacker, Location victim) {
-        if(isPvPForced(attacker) && isPvPForced(victim)) return true;
-
         if(towny != null) {
             try {
-                if (TownyUniverse.isWarTime()) return true;
+                if (isTownyPvPForced(loc)) return true;
             } catch(Exception ex) {
                 // May happen when the Towny API changes
                 towny = null;
@@ -88,6 +123,10 @@ public class EngineBukkit extends PvPTime<String> {
         }
 
         return false;
+    }
+
+    protected boolean isPvPForced(Location attacker, Location victim) {
+        return isPvPForced(attacker) && isPvPForced(victim);
     }
 
     @Override
@@ -128,10 +167,10 @@ public class EngineBukkit extends PvPTime<String> {
         World w = Bukkit.getWorld(dimension);
         if(w == null) return;
 
-        String[] cmds = isPvPTime ? options.getStartCmds() : options.getEndCmds();
+        List<String> cmds = isPvPTime ? options.getStartCommands() : options.getEndCommands();
 
         // Runs the commands if any
-        if(cmds != null && cmds.length > 0) {
+        if(cmds != null && !cmds.isEmpty()) {
             CommandSender sender = Bukkit.getConsoleSender();
             for(String cmd : cmds) Bukkit.dispatchCommand(sender, cmd);
         }
@@ -162,6 +201,11 @@ public class EngineBukkit extends PvPTime<String> {
         } else if(dimension instanceof World) {
 
             return ((World)dimension).getName();
+
+        } else if(dimension instanceof UUID) {
+
+            World w = Bukkit.getServer().getWorld((UUID)dimension);
+            return w != null ? w.getName() : null;
 
         }
         return null;

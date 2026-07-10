@@ -4,7 +4,6 @@ import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.WorldOptions;
-import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -97,8 +96,8 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         o.setPvPTimeEnd(getConfigElement(cat + ".endTime", o.getPvPTimeEnd()));
         o.setStartMessage(getConfigElement(cat + ".startMessage", o.getStartMessage()));
         o.setEndMessage(getConfigElement(cat + ".endMessage", o.getEndMessage()));
-        o.setStartCmds(getStringList(cat + ".startCmds", o.getStartCmds()));
-        o.setEndCmds(getStringList(cat + ".endCmds", o.getEndCmds()));
+        o.setStartCommands(getStringList(cat + ".startCmds", o.getStartCommands()));
+        o.setEndCommands(getStringList(cat + ".endCmds", o.getEndCommands()));
     }
 
     private <T> T getConfigElement(String path, T def) {
@@ -111,14 +110,13 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         return def;
     }
 
-    private String[] getStringList(String path, String[] def) {
+    private List<String> getStringList(String path, List<String> def) {
         Configuration config = getConfig();
 
         if(config.contains(path)) {
-            List<String> list = config.getStringList(path);
-            return list.toArray(new String[list.size()]);
+            return config.getStringList(path);
         }
-        config.set(path, Arrays.asList(def));
+        config.set(path, def);
         return def;
     }
 
@@ -227,5 +225,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
             if(defaultOptions == null) loadConfig();
             loadWorld(defaultOptions, world);
         }
+
+        updateTimer(2);
     }
 }

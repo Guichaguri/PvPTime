@@ -1,10 +1,12 @@
 name: PvPTime
 main: com.guichaguri.pvptime.bukkit.PvPTimeBukkit
-version: 2.0.5
+version: ${version}
 description: Lets you choose what in-game time you want PvP enabled.
 softdepend:
 - WorldGuard
 - Towny
+- FlagWar
+- SiegeWar
 authors:
 - Guichaguri
 - Erbros
