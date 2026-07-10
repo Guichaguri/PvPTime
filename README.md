@@ -1,13 +1,13 @@
-# [PvPTime](http://guichaguri.com/PvPTime/)
-PvPTime for Forge, Sponge and Bukkit
+# [PvPTime](https://guichaguri.com/PvPTime/)
+PvPTime for NeoForge, Sponge and Bukkit
 
 * [Configuration](https://github.com/Guichaguri/PvPTime/wiki/Configuration)
 * [API](https://github.com/Guichaguri/PvPTime/wiki/API)
 
 ## Downloads
-* [CurseForge](https://minecraft.curseforge.com/projects/pvptime) (Minecraft Forge)
-* [Bukkit Dev](https://dev.bukkit.org/projects/pvptime) (Bukkit/Spigot)
-* [Sponge Ore](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge)
+* [PvPTime for Bukkit](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Spigot/Paper/etc)
+* [PvPTime for Sponge](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
+* [PvPTime for NeoForge](https://www.curseforge.com/minecraft/mc-mods/pvptime)
 
 ## Building
 To compile the mod, run `gradle mod:build`
