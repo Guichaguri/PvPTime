@@ -72,7 +72,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         engine.setEnableSiegeWar(getConfigElement("general.enableSiegeWarIntegration", true, "Whether the SiegeWar integration will be enabled.\nThis will enable PvP at day in a town with an active siege."));
 
         defaultOptions = new WorldOptions();
-        loadWorld("default", defaultOptions);
+        loadWorld("default", defaultOptions, "Default Options. The options below are copied to newly created dimensions");
 
         for(World world : Bukkit.getWorlds()) {
             loadWorld(defaultOptions, world);
@@ -87,12 +87,12 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         WorldOptions def = new WorldOptions(defaultOptions);
         def.setEnabled(isSurface || def.isEnabled());
 
-        loadWorld("world." + world.getName(), def);
+        loadWorld("world." + world.getName(), def, "Configuration for " + world.getName());
 
         engine.setWorldOptions(world.getName(), def);
     }
 
-    private void loadWorld(String cat, WorldOptions o) {
+    private void loadWorld(String cat, WorldOptions o, String comment) {
         o.setEnabled(getConfigElement(cat + ".enabled", o.isEnabled(), "Whether PvPTime will be disabled on this world"));
         o.setEngineMode(getConfigElement(cat + ".engineMode", o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
         o.setTotalDayTime(getConfigElement(cat + ".totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has"));
@@ -102,6 +102,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         o.setEndMessage(getConfigElement(cat + ".endMessage", o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
         o.setStartCommands(getStringList(cat + ".startCmds", o.getStartCommands(), "Commands to be executed when the PvPTime starts"));
         o.setEndCommands(getStringList(cat + ".endCmds", o.getEndCommands(), "Commands to be executed when the PvPTime ends"));
+        getConfig().setComments(cat, List.of(comment));
     }
 
     private <T> T getConfigElement(String path, T def, String comment) {
