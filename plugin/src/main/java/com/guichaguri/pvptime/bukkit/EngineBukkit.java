@@ -32,6 +32,10 @@ import org.bukkit.plugin.PluginManager;
 public class EngineBukkit extends PvPTime<String> {
 
     private Plugin worldguard, towny, flagWar, siegeWar;
+    private boolean enableWorldguard = true;
+    private boolean enableTowny = true;
+    private boolean enableFlagWar = true;
+    private boolean enableSiegeWar = true;
 
     public EngineBukkit() {
         prepareDependencies();
@@ -68,13 +72,13 @@ public class EngineBukkit extends PvPTime<String> {
         if (town == null) return false;
 
         // If the town has an active war
-        if (town.hasActiveWar()) return true;
+        if (enableTowny && town.hasActiveWar()) return true;
 
-        if(flagWar != null) {
+        if(flagWar != null && enableFlagWar) {
             try {
                 if (FlagWarAPI.isUnderAttack(town)) return true;
             } catch(Exception ex) {
-                // May happen when the Towny API changes
+                // May happen when the FlagWar API changes
                 flagWar = null;
                 System.out.println("Couldn't check whether the town is under attack on FlagWar.");
                 System.out.println("The integration has been disabled for now.");
@@ -82,11 +86,11 @@ public class EngineBukkit extends PvPTime<String> {
             }
         }
 
-        if(siegeWar != null) {
+        if(siegeWar != null && enableSiegeWar) {
             try {
                 if (SiegeWarAPI.hasActiveSiege(town)) return true;
             } catch(Exception ex) {
-                // May happen when the Towny API changes
+                // May happen when the SiegeWar API changes
                 siegeWar = null;
                 System.out.println("Couldn't check whether a siege is active on SiegeWar.");
                 System.out.println("The integration has been disabled for now.");
@@ -98,7 +102,7 @@ public class EngineBukkit extends PvPTime<String> {
     }
 
     private boolean isPvPForced(Location loc) {
-        if(worldguard != null) {
+        if(worldguard != null && enableWorldguard) {
             try {
                 if (isWorldGuardPvPForced(loc)) return true;
             } catch(Exception ex) {
@@ -110,7 +114,7 @@ public class EngineBukkit extends PvPTime<String> {
             }
         }
 
-        if(towny != null) {
+        if(towny != null && (enableTowny || enableFlagWar || enableSiegeWar)) {
             try {
                 if (isTownyPvPForced(loc)) return true;
             } catch(Exception ex) {
@@ -134,17 +138,12 @@ public class EngineBukkit extends PvPTime<String> {
         World world = Bukkit.getWorld(dimension);
         if(world == null) return null;
 
-        switch(options.getEngineMode()) {
-            case -2:
-                return true; // PvP always enabled on engine mode -2
-            case -1:
-                return false; // PvP always disabled on engine mode -1
-            case 1:
-            case 2:
-                return checkPvPTime(options, world.getFullTime());
-            default:
-                return null;
-        }
+        return switch (options.getEngineMode()) {
+            case -2 -> true; // PvP always enabled on engine mode -2
+            case -1 -> false; // PvP always disabled on engine mode -1
+            case 1, 2 -> checkPvPTime(options, world.getFullTime());
+            default -> null;
+        };
     }
 
     @Override
@@ -209,5 +208,37 @@ public class EngineBukkit extends PvPTime<String> {
 
         }
         return null;
+    }
+
+    /**
+     * Whether it should enable the WorldGuard integration
+     * @param enableWorldguard The flag
+     */
+    public void setEnableWorldguard(boolean enableWorldguard) {
+        this.enableWorldguard = enableWorldguard;
+    }
+
+    /**
+     * Whether it should enable the Towny integration
+     * @param enableTowny The flag
+     */
+    public void setEnableTowny(boolean enableTowny) {
+        this.enableTowny = enableTowny;
+    }
+
+    /**
+     * Whether it should enable the FlagWar integration
+     * @param enableFlagWar The flag
+     */
+    public void setEnableFlagWar(boolean enableFlagWar) {
+        this.enableFlagWar = enableFlagWar;
+    }
+
+    /**
+     * Whether it should enable the SiegeWar integration
+     * @param enableSiegeWar The flag
+     */
+    public void setEnableSiegeWar(boolean enableSiegeWar) {
+        this.enableSiegeWar = enableSiegeWar;
     }
 }

@@ -65,7 +65,11 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     }
 
     protected void loadConfig() {
-        engine.setAtLeastTwoPlayers(getConfigElement("general.atLeastTwoPlayers", false));
+        engine.setAtLeastTwoPlayers(getConfigElement("general.atLeastTwoPlayers", false, "Whether messages will broadcast if there's at least two players online"));
+        engine.setEnableWorldguard(getConfigElement("general.enableWorldGuardIntegration", true, "Whether the WorldGuard integration will be enabled.\nThis will enable PvP at day in a region with 'pvp' flag set to true."));
+        engine.setEnableTowny(getConfigElement("general.enableTownyIntegration", true, "Whether the Towny integration will be enabled.\nThis will enable PvP at day in a town with an active war"));
+        engine.setEnableFlagWar(getConfigElement("general.enableFlagWarIntegration", true, "Whether the FlagWar integration will be enabled.\nThis will enable PvP at day in a town that is under attack."));
+        engine.setEnableSiegeWar(getConfigElement("general.enableSiegeWarIntegration", true, "Whether the SiegeWar integration will be enabled.\nThis will enable PvP at day in a town with an active siege."));
 
         defaultOptions = new WorldOptions();
         loadWorld("default", defaultOptions);
@@ -89,34 +93,44 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     }
 
     private void loadWorld(String cat, WorldOptions o) {
-        o.setEnabled(getConfigElement(cat + ".enabled", o.isEnabled()));
-        o.setEngineMode(getConfigElement(cat + ".engineMode", o.getEngineMode()));
-        o.setTotalDayTime(getConfigElement(cat + ".totalDayTime", o.getTotalDayTime()));
-        o.setPvPTimeStart(getConfigElement(cat + ".startTime", o.getPvPTimeStart()));
-        o.setPvPTimeEnd(getConfigElement(cat + ".endTime", o.getPvPTimeEnd()));
-        o.setStartMessage(getConfigElement(cat + ".startMessage", o.getStartMessage()));
-        o.setEndMessage(getConfigElement(cat + ".endMessage", o.getEndMessage()));
-        o.setStartCommands(getStringList(cat + ".startCmds", o.getStartCommands()));
-        o.setEndCommands(getStringList(cat + ".endCmds", o.getEndCommands()));
+        o.setEnabled(getConfigElement(cat + ".enabled", o.isEnabled(), "Whether PvPTime will be disabled on this world"));
+        o.setEngineMode(getConfigElement(cat + ".engineMode", o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
+        o.setTotalDayTime(getConfigElement(cat + ".totalDayTime", o.getTotalDayTime(), "The total time that a Minecraft day has"));
+        o.setPvPTimeStart(getConfigElement(cat + ".startTime", o.getPvPTimeStart(), "Time in ticks that the PvP will be enabled"));
+        o.setPvPTimeEnd(getConfigElement(cat + ".endTime", o.getPvPTimeEnd(), "Time in ticks that the PvP will be disabled"));
+        o.setStartMessage(getConfigElement(cat + ".startMessage", o.getStartMessage(), "Message to be broadcasted when the PvP Time starts"));
+        o.setEndMessage(getConfigElement(cat + ".endMessage", o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
+        o.setStartCommands(getStringList(cat + ".startCmds", o.getStartCommands(), "Commands to be executed when the PvPTime starts"));
+        o.setEndCommands(getStringList(cat + ".endCmds", o.getEndCommands(), "Commands to be executed when the PvPTime ends"));
     }
 
-    private <T> T getConfigElement(String path, T def) {
+    private <T> T getConfigElement(String path, T def, String comment) {
         Configuration config = getConfig();
 
         if(config.contains(path)) {
             return (T)config.get(path, def);
         }
+
         config.set(path, def);
+
+        if (comment != null) {
+            config.setComments(path, List.of(comment.split("\n")));
+        }
         return def;
     }
 
-    private List<String> getStringList(String path, List<String> def) {
+    private List<String> getStringList(String path, List<String> def, String comment) {
         Configuration config = getConfig();
 
         if(config.contains(path)) {
             return config.getStringList(path);
         }
+
         config.set(path, def);
+
+        if (comment != null) {
+            config.setComments(path, List.of(comment));
+        }
         return def;
     }
 
