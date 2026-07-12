@@ -15,10 +15,12 @@ repositories {
     maven {
         name = 'sponge'
         url = 'https://repo.spongepowered.org/repository/maven-public/'
+        content { includeGroup 'org.spongepowered' }
     }
     maven {
         name = 'spigot'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        content { includeGroup 'org.spigotmc' }
     }
     maven {
         name = 'enginehub'
@@ -27,14 +29,17 @@ repositories {
     maven {
         name = 'glaremasters-towny'
         url = 'https://repo.glaremasters.me/repository/towny/'
+        content { includeGroup 'com.palmergames.bukkit.towny' }
     }
     maven {
         name = 'jitpack'
         url = 'https://jitpack.io'
+        content { includeGroup 'com.github.TownyAdvanced' }
     }
     maven {
         name = 'aspect-repo'
         url = 'https://maven.aspect-realms.ru/repository/maven-public/'
+        content { includeGroup 'com.github.SawFowl' }
     }
 }
 
