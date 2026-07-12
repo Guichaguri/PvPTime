@@ -50,8 +50,8 @@ public class PvPTimeConfig {
     }
 
     public void loadEngine(EngineNeoForge engine) {
-        engine.setOnlyMultiplayer(get("general", "onlyMultiplayer", true, "Messages will broadcast when is a server or lan"));
-        engine.setAtLeastTwoPlayers(get("general", "atLeastTwoPlayers", false, "Messages will broadcast if there's at least two players online"));
+        engine.setOnlyMultiplayer(get("general", "onlyMultiplayer", true, "Whether messages will broadcast when is a server or lan"));
+        engine.setAtLeastTwoPlayers(get("general", "atLeastTwoPlayers", false, "Whether messages will broadcast if there's at least two players online"));
         config.setComment("general", "General Configuration");
     }
 

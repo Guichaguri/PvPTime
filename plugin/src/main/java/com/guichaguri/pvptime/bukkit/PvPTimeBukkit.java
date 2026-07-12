@@ -70,6 +70,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         engine.setEnableTowny(getConfigElement("general.enableTownyIntegration", true, "Whether the Towny integration will be enabled.\nThis will enable PvP at day in a town with an active war"));
         engine.setEnableFlagWar(getConfigElement("general.enableFlagWarIntegration", true, "Whether the FlagWar integration will be enabled.\nThis will enable PvP at day in a town that is under attack."));
         engine.setEnableSiegeWar(getConfigElement("general.enableSiegeWarIntegration", true, "Whether the SiegeWar integration will be enabled.\nThis will enable PvP at day in a town with an active siege."));
+        getConfig().setComments("general", List.of("General Configuration"));
 
         defaultOptions = new WorldOptions();
         loadWorld("default", defaultOptions, "Default Options. The options below are copied to newly created dimensions");
