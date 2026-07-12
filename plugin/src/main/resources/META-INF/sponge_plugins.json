@@ -26,6 +26,12 @@
           "id": "spongeapi",
           "version": "17.0.0",
           "optional": false
+        },
+        {
+          "id": "regionguard",
+          "version": "[4.4,)",
+          "load-order": "after",
+          "optional": true
         }
       ]
     }

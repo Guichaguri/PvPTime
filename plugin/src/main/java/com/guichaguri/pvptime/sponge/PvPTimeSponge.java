@@ -6,7 +6,6 @@ import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.api.PvPTimeAPI;
 import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -136,11 +135,13 @@ public class PvPTimeSponge implements Runnable {
         if(configRoot == null) reloadConfig();
 
         engine.setAtLeastTwoPlayers(getConfigElement(configRoot.node("general", "atLeastTwoPlayers"), false, "Messages will broadcast if there's at least two players online"));
+        engine.setEnableRegionGuard(getConfigElement(configRoot.node("general", "enableRegionGuardIntegration"), false, "Whether the RegionGuard integration will be enabled.\nThis will enable PvP at day in a region with 'pvp' flag set to true."));
+        configRoot.node("general").comment("General Configuration");
 
         defaultOptions = new WorldOptions();
-        defaultOptions.setStartMessage("<red>It's night and PvP is turned on</red>");
-        defaultOptions.setEndMessage("<green>It's daytime and PvP is turned off</green>");
-        loadWorld(configRoot.node("default"), defaultOptions);
+        defaultOptions.setStartMessage("<red>It's night and PvP is turned on</red>"); // use minimessage instead of color codes
+        defaultOptions.setEndMessage("<green>It's daytime and PvP is turned off</green>"); // use minimessage instead of color codes
+        loadWorld(configRoot.node("default"), defaultOptions, "Default Options. The options below are copied to newly created dimensions");
 
         for(ServerWorld world : Sponge.server().worldManager().worlds()) {
             loadWorld(defaultOptions, world);
@@ -155,12 +156,12 @@ public class PvPTimeSponge implements Runnable {
         WorldOptions def = new WorldOptions(defaultOptions);
         def.setEnabled(isSurface || def.isEnabled());
 
-        loadWorld(configRoot.node("world", world.key().asString()), def);
+        loadWorld(configRoot.node("world", world.key().asString()), def, "Configuration for " + world.key().asString());
 
         engine.setWorldOptions(world.key(), def);
     }
 
-    private void loadWorld(CommentedConfigurationNode root, WorldOptions o) {
+    private void loadWorld(CommentedConfigurationNode root, WorldOptions o, String comment) {
         o.setEnabled(getConfigElement(root.node("enabled"), o.isEnabled(), "Whether PvPTime will be disabled on this dimension"));
         o.setEngineMode(getConfigElement(root.node("engineMode"), o.getEngineMode(), "1: Configurable Time | -1: PvP always disabled | -2: PvP always enabled"));
         o.setTotalDayTime(getConfigElement(root.node("totalDayTime"), o.getTotalDayTime(), "The total time that a Minecraft day has"));
@@ -170,6 +171,7 @@ public class PvPTimeSponge implements Runnable {
         o.setEndMessage(getConfigElement(root.node("endMessage"), o.getEndMessage(), "Message to be broadcasted when the PvP Time ends"));
         o.setStartCommands(getStringList(root.node("startCmds"), o.getStartCommands(), "Commands to be executed when the PvPTime starts"));
         o.setEndCommands(getStringList(root.node("endCmds"), o.getEndCommands(), "Commands to be executed when the PvPTime ends"));
+        root.comment(comment);
     }
 
     private <T> T getConfigElement(CommentedConfigurationNode node, T def, String comment) {
@@ -258,16 +260,18 @@ public class PvPTimeSponge implements Runnable {
         // Player shot himself?
         if(player.uniqueId().equals(victim.uniqueId())) return;
 
-        if(((ServerPlayer)victim).hasPermission("pvptime.nopvp")) {
+        if(engine.isPvPForced(attacker.serverLocation(), victim.serverLocation())) return;
+
+        if(((ServerPlayer)victim).hasPermission("pvptime.nopvp", event.cause())) {
             // The victim has the permission to disable pvp even in night time
             event.setCancelled(true);
             return;
-        } else if(player.hasPermission("pvptime.override")) {
+        } else if(player.hasPermission("pvptime.override", event.cause())) {
             // The attacker has the permission to enable pvp even in day time
             return;
         }
 
-        Boolean isPvPTime = engine.isPvPTime(((ServerPlayer)victim).world().key());
+        Boolean isPvPTime = engine.isPvPTime(player.world().key());
 
         // Cancel the event when it's not pvp time
         if(isPvPTime != null && !isPvPTime) {
@@ -284,6 +288,8 @@ public class PvPTimeSponge implements Runnable {
             if(defaultOptions == null) loadConfig();
             loadWorld(defaultOptions, world);
         }
+
+        updateTimer(2);
     }
 
 }

@@ -16,17 +16,63 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.plugin.PluginContainer;
+import sawfowl.regionguard.api.Flags;
+import sawfowl.regionguard.api.RegionAPI;
+import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.data.WorldRegions;
 
 /**
  * @author Guilherme Chaguri
  */
 public class EngineSponge extends PvPTime<ResourceKey> {
     private final Logger logger;
+    private PluginContainer regionGuard;
+    private boolean enableRegionGuard = false;
 
     public EngineSponge(Logger logger) {
         super();
         this.logger = logger;
+
+        prepareDependencies();
+    }
+
+    private void prepareDependencies() {
+        PluginManager manager = Sponge.game().pluginManager();
+        regionGuard = manager.plugin("regionguard").orElse(null);
+    }
+
+    private boolean isRegionGuardPvPForced(ServerLocation location) {
+        RegionAPI api = RegionAPI.getInstance();
+
+        WorldRegions regions = api.getRegions(location.world());
+        Region region = regions.findRegion(location.blockPosition());
+
+        return region.getFlagResult(Flags.PVP, null, null) == Tristate.TRUE;
+    }
+
+    private boolean isPvPForced(ServerLocation location) {
+        if (regionGuard != null && enableRegionGuard) {
+            try {
+                if (isRegionGuardPvPForced(location)) return true;
+            } catch(Exception ex) {
+                // May happen when the RegionGuard API changes
+                regionGuard = null;
+                logger.warn("Couldn't check whether the PvP is forced on RegionGuard.");
+                logger.warn("The integration has been disabled for now.");
+                logger.warn(ex);
+            }
+        }
+
+        return false;
+    }
+
+    protected boolean isPvPForced(ServerLocation attacker, ServerLocation victim) {
+        return isPvPForced(attacker) && isPvPForced(victim);
     }
 
     @Override
@@ -120,5 +166,13 @@ public class EngineSponge extends PvPTime<ResourceKey> {
 
         }
         return null;
+    }
+
+    /**
+     * Whether the RegionGuard integration will be enabled
+     * @param enableRegionGuard The flag
+     */
+    public void setEnableRegionGuard(boolean enableRegionGuard) {
+        this.enableRegionGuard = enableRegionGuard;
     }
 }

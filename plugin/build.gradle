@@ -32,6 +32,10 @@ repositories {
         name = 'jitpack'
         url = 'https://jitpack.io'
     }
+    maven {
+        name = 'aspect-repo'
+        url = 'https://maven.aspect-realms.ru/repository/maven-public/'
+    }
 }
 
 dependencies {
@@ -44,7 +48,7 @@ dependencies {
     // Bukkit
     compileOnly 'org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT'
 
-    // WorldGuard and WorldEdit
+    // WorldGuard and WorldEdit (Bukkit Plugin)
     compileOnly ('com.sk89q.worldguard:worldguard-core:7.0.17-SNAPSHOT') {
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'com.google.code.gson', module: 'gson'
@@ -54,12 +58,16 @@ dependencies {
         exclude group: 'com.google.code.gson', module: 'gson'
     }
 
-    // Towny
+    // Towny (Bukkit Plugin)
     compileOnly 'com.palmergames.bukkit.towny:towny:0.103.0.6'
     compileOnly 'com.github.TownyAdvanced:FlagWar:0.8.1'
     compileOnly('com.github.TownyAdvanced:SiegeWar:3.6.1') {
         exclude group: 'us.dynmap', module: 'dynmap-api'
     }
+
+    // RegionGuard (Sponge Plugin)
+    //compileOnly files('./libs/RegionGuard-4.4.1.jar')
+    compileOnly 'com.github.SawFowl:RegionGuard:4.4.1'
 }
 
 // Built-in Gradle resource filtering (replaces the SnakeYAML workaround)
