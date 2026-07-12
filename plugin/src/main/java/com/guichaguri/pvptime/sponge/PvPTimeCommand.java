@@ -28,14 +28,14 @@ public class PvPTimeCommand implements CommandExecutor {
         CommandCause src = context.cause();
         if(!src.hasPermission("pvptime.reload")) {
             info(src, true);
+            return CommandResult.success();
         } else {
-            help(src);
+            return help(context);
         }
-        return CommandResult.success();
     }
 
     public CommandResult info(CommandContext context) {
-        info(context.cause(), false);
+        info(context.cause(), !context.hasPermission("pvptime.info.all"));
         return CommandResult.success();
     }
 
@@ -43,6 +43,22 @@ public class PvPTimeCommand implements CommandExecutor {
         plugin.reloadConfig();
         plugin.loadConfig();
         context.cause().sendMessage(Component.text("The configuration file was reloaded", NamedTextColor.GREEN));
+        return CommandResult.success();
+    }
+
+    public CommandResult help(CommandContext context) {
+        CommandCause src = context.cause();
+
+        src.sendMessage(Component.text("------------ PvPTime ------------", NamedTextColor.GREEN));
+
+        Component infoDescription = Component.text("Shows information about the worlds", NamedTextColor.YELLOW);
+        src.sendMessage(Component.text("/pvptime info ", NamedTextColor.GOLD).append(infoDescription));
+
+        Component reloadDescription = Component.text("Reloads the configuration file", NamedTextColor.YELLOW);
+        src.sendMessage(Component.text("/pvptime reload ", NamedTextColor.GOLD).append(reloadDescription));
+
+        src.sendMessage(Component.text("--------------------------------", NamedTextColor.GREEN));
+
         return CommandResult.success();
     }
 
@@ -72,17 +88,5 @@ public class PvPTimeCommand implements CommandExecutor {
         }
 
         src.sendMessage(Component.text(name + " ", NamedTextColor.GOLD).append(pvp));
-    }
-
-    private void help(CommandCause src) {
-        src.sendMessage(Component.text("------------ PvPTime ------------", NamedTextColor.GREEN));
-
-        Component infoDescription = Component.text("Shows information about the worlds", NamedTextColor.YELLOW);
-        src.sendMessage(Component.text("/pvptime info ", NamedTextColor.GOLD).append(infoDescription));
-
-        Component reloadDescription = Component.text("Reloads the configuration file", NamedTextColor.YELLOW);
-        src.sendMessage(Component.text("/pvptime reload ", NamedTextColor.GOLD).append(reloadDescription));
-
-        src.sendMessage(Component.text("--------------------------------", NamedTextColor.GREEN));
     }
 }

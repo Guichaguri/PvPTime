@@ -8,6 +8,7 @@ import com.guichaguri.pvptime.common.WorldOptions;
 import java.io.IOException;
 import java.util.List;
 
+import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
@@ -33,7 +34,10 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
@@ -75,12 +79,17 @@ public class PvPTimeSponge implements Runnable {
                 .permission("pvptime.reload")
                 .executor(executor::reload)
                 .build();
+        Command.Parameterized helpCommand = Command.builder()
+                .permission("pvptime.info")
+                .executor(executor::help)
+                .build();
 
         Command.Parameterized command = Command.builder()
                 .permission("pvptime.info")
                 .executor(executor)
                 .addChild(infoCommand, "info")
                 .addChild(reloadCommand, "reload")
+                .addChild(helpCommand, "help")
                 .build();
 
         event.register(this.container, command, "pvptime");
@@ -101,6 +110,39 @@ public class PvPTimeSponge implements Runnable {
         } catch(Exception ex) {
             logger.error("Failed to load configuration file", ex);
         }
+
+        PermissionService perms = event.engine().serviceProvider().permissionService();
+
+        perms.newDescriptionBuilder(container)
+                .id("pvptime.nopvp")
+                .description(Component.text("Disable PvP for a player even in nighttime."))
+                .defaultValue(Tristate.FALSE)
+                .register();
+
+        perms.newDescriptionBuilder(container)
+                .id("pvptime.override")
+                .description(Component.text("Let the player deal damage even when it's not pvp time."))
+                .defaultValue(Tristate.FALSE)
+                .register();
+
+        perms.newDescriptionBuilder(container)
+                .id("pvptime.reload")
+                .description(Component.text("Reload the configuration file."))
+                .defaultValue(Tristate.FALSE)
+                .assign(PermissionDescription.ROLE_ADMIN, true)
+                .register();
+
+        perms.newDescriptionBuilder(container)
+                .id("pvptime.info.current")
+                .description(Component.text("Get info for the current world."))
+                .defaultValue(Tristate.TRUE)
+                .register();
+
+        perms.newDescriptionBuilder(container)
+                .id("pvptime.info.all")
+                .description(Component.text("Get info for all worlds."))
+                .defaultValue(Tristate.TRUE)
+                .register();
     }
 
     @Listener

@@ -10,7 +10,7 @@ softdepend:
 authors:
 - Guichaguri
 - Erbros
-website: http://guichaguri.com
+website: https://github.com/Guichaguri/PvPTime
 commands:
   pvptime:
     description: Information regarding usage of PvPTime.
@@ -22,16 +22,25 @@ permissions:
       pvptime.nopvp: true
       pvptime.override: true
       pvptime.reload: true
-      pvptime.info: true
+      pvptime.info.current: true
+      pvptime.info.all: true
   pvptime.nopvp:
-    description: Permission to disable PvP for a player
+    description: Disable PvP for a player even in nighttime.
     default: false
   pvptime.override:
     description: Let the player deal damage even when it's not pvp time.
     default: false
   pvptime.reload:
-    description: Permission to reload the configs.
+    description: Reload the configuration file.
     default: op
   pvptime.info:
-    description: Permission to get config info.
+    description: Get PvPTime info.
+    children:
+      pvptime.info.current: true
+      pvptime.info.all: true
+  pvptime.info.current:
+    description: Get info for the current world.
+    default: true
+  pvptime.info.all:
+    description: Get info for all worlds.
     default: true

@@ -24,7 +24,7 @@ public class PvPTimeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(args.length > 0 && args[0].equalsIgnoreCase("info")) {
-            info(sender, false);
+            info(sender, !sender.hasPermission("pvptime.info.all"));
         } else if(args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             reload(sender);
         } else if(sender.hasPermission("pvptime.info")) {
