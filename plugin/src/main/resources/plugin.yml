@@ -1,6 +1,7 @@
 name: PvPTime
 main: com.guichaguri.pvptime.bukkit.PvPTimeBukkit
 version: ${version}
+api-version: 1.7.10
 description: Lets you choose what in-game time you want PvP enabled.
 softdepend:
 - WorldGuard
