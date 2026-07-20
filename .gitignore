@@ -1,8 +1,6 @@
 .idea/
 .gradle/
 build/
-gradle/
 libs/
 run/
-gradle.properties
 *.gpg
