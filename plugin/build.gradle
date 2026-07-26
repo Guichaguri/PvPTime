@@ -1,13 +1,16 @@
 plugins {
     id 'java'
     id 'signing'
-    id 'com.gradleup.shadow' version '8.3.0'
 }
 
 group = 'com.guichaguri.pvptime'
 version = ver
 
+jar.archiveBaseName = 'PvPTime-Plugin'
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+sourceSets.main.java.srcDirs += '../common/src/main/java'
 
 repositories {
     mavenCentral()
@@ -50,7 +53,7 @@ repositories {
 
 dependencies {
     // Common
-    implementation project(':common')
+    compileOnly project(':common')
 
     // Sponge
     compileOnly 'org.spongepowered:spongeapi:17.0.0'
@@ -77,15 +80,12 @@ dependencies {
     }
 
     // RegionGuard (Sponge Plugin)
-    //compileOnly files('./libs/RegionGuard-4.4.1.jar')
-    compileOnly 'com.github.SawFowl:RegionGuard:4.4.1'
+    compileOnly files('./libs/RegionGuard-4.4.1.jar')
+    //compileOnly 'com.github.SawFowl:RegionGuard:4.4.1'
 }
 
-// Built-in Gradle resource filtering (replaces the SnakeYAML workaround)
-// To use this, change your src/main/resources/plugin.yml version line to:
-// version: '${version}'
 processResources {
-    def props = [version: project.version]
+    def props = [version: ver]
     inputs.properties props
     filteringCharset = 'UTF-8'
 
@@ -96,13 +96,4 @@ processResources {
     filesMatching('META-INF/sponge_plugins.json') {
         expand props
     }
-}
-
-tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveClassifier = ''
-    archiveBaseName = 'PvPTime'
-}
-
-signing {
-    sign tasks.named('shadowJar').get()
 }
