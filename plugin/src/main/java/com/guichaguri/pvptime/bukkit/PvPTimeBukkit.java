@@ -35,6 +35,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     private WorldOptions defaultOptions;
 
     private int task = -1;
+    private long lastTicksLeft = 0;
 
     @Override
     public void onEnable() {
@@ -142,6 +143,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         if(task != -1) scheduler.cancelTask(task);
         task = scheduler.scheduleSyncDelayedTask(this, this, ticksLeft);
+        lastTicksLeft = ticksLeft;
     }
 
     @Override
@@ -154,7 +156,9 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     public void onCommand(PlayerCommandPreprocessEvent event) {
         // Force an update when a command is triggered
         // This prevents time commands from messing up the ticks count
-        updateTimer(2);
+        if (lastTicksLeft > 2) {
+            updateTimer(2);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

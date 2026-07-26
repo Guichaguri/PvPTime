@@ -66,6 +66,7 @@ public class PvPTimeSponge implements Runnable {
     private WorldOptions defaultOptions;
 
     private ScheduledTask task;
+    private long lastTimeLeft = 0;
 
     @Listener
     public void onRegisterCommands(RegisterCommandEvent<Command.Parameterized> event) {
@@ -265,6 +266,7 @@ public class PvPTimeSponge implements Runnable {
                 .delay(Ticks.of(timeLeft))
                 .build()
         );
+        lastTimeLeft = timeLeft;
     }
 
     @Override
@@ -277,7 +279,9 @@ public class PvPTimeSponge implements Runnable {
     public void onCommand(ExecuteCommandEvent event) {
         // Force an update when a command is triggered
         // This prevents time commands from messing up the ticks count
-        updateTimer(2);
+        if (lastTimeLeft > 2) {
+            updateTimer(2);
+        }
     }
 
     @Listener(order = Order.LAST)
