@@ -22,3 +22,4 @@ authors="Guichaguri"
 description='''
 Lets you choose what in-game hours you want PvP enabled.
 '''
+displayTest="IGNORE_SERVER_VERSION"

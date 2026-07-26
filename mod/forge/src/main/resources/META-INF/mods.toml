@@ -16,17 +16,16 @@ authors="Guichaguri"
 description='''
 Lets you choose what in-game hours you want PvP enabled.
 '''
+displayTest="IGNORE_SERVER_VERSION"
 
 [[dependencies.pvptime]] #recommended
     modId="forge"
     mandatory=true
     versionRange="[65,)"
     ordering="NONE"
-    side="SERVER"
 
 [[dependencies.pvptime]] #recommended
     modId="minecraft"
     mandatory=true
     versionRange="[26.2,26.3,)"
     ordering="NONE"
-    side="SERVER"
