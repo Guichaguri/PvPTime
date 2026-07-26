@@ -23,7 +23,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.scheduler.BukkitScheduler;
 
 /**
  * @author Guilherme Chaguri
@@ -34,11 +33,13 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
 
     private WorldOptions defaultOptions;
 
-    private int task = -1;
+    private PvPTimeScheduler scheduler;
     private long lastTicksLeft = 0;
 
     @Override
     public void onEnable() {
+        scheduler = PvPTimeScheduler.create(this, this);
+
         engine = new EngineBukkit();
         PvPTimeAPI.setAPI(engine);
 
@@ -140,9 +141,7 @@ public class PvPTimeBukkit extends JavaPlugin implements Listener, Runnable {
     private void updateTimer(long ticksLeft) {
         if(ticksLeft <= 0) ticksLeft = 1; // Prevents the server from freezing if something goes wrong
 
-        BukkitScheduler scheduler = Bukkit.getScheduler();
-        if(task != -1) scheduler.cancelTask(task);
-        task = scheduler.scheduleSyncDelayedTask(this, this, ticksLeft);
+        scheduler.reschedule(ticksLeft);
         lastTicksLeft = ticksLeft;
     }
 
