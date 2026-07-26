@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "pvptime",
+  "version": "${version}",
+  "name": "PvPTime",
+  "description": "Lets you choose what in-game hours you want PvP enabled.",
+  "authors": [
+    "Guichaguri"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Guichaguri/PvPTime",
+    "sources": "https://github.com/Guichaguri/PvPTime"
+  },
+  "license": "GPL-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.guichaguri.pvptime.fabric.PvPTimeFabric"
+    ]
+  },
+  "mixins": [
+    "pvptime-fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19",
+    "fabric-api": "*",
+    "minecraft": ">=26.2",
+    "java": ">=21"
+  }
+}

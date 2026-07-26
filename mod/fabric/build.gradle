@@ -1,0 +1,58 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+group = 'com.guichaguri.pvptime'
+version = ver
+
+jar.archiveBaseName = 'PvPTime-Fabric'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+sourceSets.main.java.srcDirs += '../shared/src/main/java'
+sourceSets.main.java.srcDirs += '../../common/src/main/java'
+
+loom {
+    mods {
+        "pvptime" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    compileOnly project(':common')
+    compileOnly project(':mod:shared')
+
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+
+    implementation "net.fabricmc:fabric-loader:${fabric_loader}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
+    implementation include("blue.endless:jankson:1.2.3")
+}
+
+processResources {
+    def version = project.version
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": version
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.guichaguri.pvptime.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CommandsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

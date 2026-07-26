@@ -10,7 +10,7 @@ PvPTime for NeoForge, Sponge and Bukkit
 * [PvPTime for NeoForge](https://www.curseforge.com/minecraft/mc-mods/pvptime)
 
 ## Building
-To compile the mod, run `gradle mod:jarJar`
+To compile the mod, run `gradle mod:build`
 
 To compile the plugin, run `gradle plugin:shadowJar`
 

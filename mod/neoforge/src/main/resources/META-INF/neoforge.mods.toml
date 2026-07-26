@@ -1,0 +1,24 @@
+license="GPL-2.0"
+
+# A URL to refer people to when problems occur with this mod
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+
+# A list of mods - how many allowed here is determined by the individual mod loader
+[[mods]]
+modId="pvptime"
+version="${mod_version}"
+displayName="PvPTime"
+
+# A URL to query for updates for this mod. See the JSON update specification https://docs.neoforged.net/docs/misc/updatechecker/
+#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
+
+displayURL="https://github.com/Guichaguri/PvPTime"
+
+# A file name (in the root of the mod JAR) containing a logo for display
+#logoFile="examplemod.png" #optional
+
+credits="Erbros for the original idea and plugin"
+authors="Guichaguri"
+description='''
+Lets you choose what in-game hours you want PvP enabled.
+'''

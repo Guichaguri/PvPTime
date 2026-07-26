@@ -3,4 +3,5 @@
 build/
 libs/
 run/
+run-data/
 *.gpg

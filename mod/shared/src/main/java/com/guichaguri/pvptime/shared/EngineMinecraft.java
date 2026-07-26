@@ -1,4 +1,4 @@
-package com.guichaguri.pvptime.neoforge;
+package com.guichaguri.pvptime.shared;
 
 import com.guichaguri.pvptime.api.IWorldOptions;
 import com.guichaguri.pvptime.common.PvPTime;
@@ -18,12 +18,12 @@ import java.util.List;
 /**
  * @author Guilherme Chaguri
  */
-public class EngineNeoForge extends PvPTime<ResourceKey<Level>> {
+public class EngineMinecraft extends PvPTime<ResourceKey<Level>> {
 
     private final MinecraftServer server;
     private boolean onlyMultiplayer = true;
 
-    public EngineNeoForge(MinecraftServer server) {
+    public EngineMinecraft(MinecraftServer server) {
         this.server = server;
     }
 

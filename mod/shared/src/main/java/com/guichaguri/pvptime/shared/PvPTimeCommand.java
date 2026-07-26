@@ -1,4 +1,4 @@
-package com.guichaguri.pvptime.neoforge;
+package com.guichaguri.pvptime.shared;
 
 import com.guichaguri.pvptime.api.IPvPTimeAPI;
 import com.mojang.brigadier.CommandDispatcher;
@@ -18,9 +18,9 @@ import net.minecraft.world.level.Level;
  */
 public class PvPTimeCommand {
 
-    private final PvPTimeNeoForge mod;
+    private final PvPTimeMod mod;
 
-    public PvPTimeCommand(PvPTimeNeoForge mod) {
+    public PvPTimeCommand(PvPTimeMod mod) {
         this.mod = mod;
     }
 
@@ -68,7 +68,7 @@ public class PvPTimeCommand {
             infoWorld(sender, sender.getLevel(), Component.literal("Current World"));
         } else {
             for(ServerLevel w : sender.getServer().getAllLevels()) {
-                infoWorld(sender, w, Component.translatable(w.getDescriptionKey()).append(" (" + w.dimension().identifier() + ") "));
+                infoWorld(sender, w, Component.literal(w.dimension().identifier() + " "));
             }
         }
 
@@ -94,8 +94,7 @@ public class PvPTimeCommand {
     private int reload(CommandContext<CommandSourceStack> context) {
         CommandSourceStack sender = context.getSource();
 
-        mod.reloadConfig();
-        mod.loadConfig(sender.getServer());
+        mod.reloadConfig(sender.getServer());
 
         sender.sendSuccess(() -> create("The configuration file was reloaded", TextColor.GREEN), false);
 

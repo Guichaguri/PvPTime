@@ -1,0 +1,14 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+group = 'com.guichaguri.pvptime'
+version = ver
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+dependencies {
+    implementation project(':common')
+
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+}
