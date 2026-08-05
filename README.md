@@ -5,9 +5,10 @@ PvPTime for Fabric, NeoForge, Forge, Sponge, Paper, Spigot and Bukkit
 * [API](https://github.com/Guichaguri/PvPTime/wiki/API)
 
 ## Downloads
-* [PvPTime for Bukkit](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Spigot/Paper/etc)
-* [PvPTime for Sponge](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
-* [PvPTime for NeoForge](https://www.curseforge.com/minecraft/mc-mods/pvptime)
+* [PvPTime (Modrinth)](https://modrinth.com/plugin/pvptime) (Fabric/NeoForge/Forge/Sponge/Bukkit/Spigot/Paper/etc)
+* [PvPTime Mod (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/pvptime) (Fabric/NeoForge/Forge)
+* [PvPTime Plugin (CurseForge)](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Bukkit/Spigot/Paper/Folia/Purpur)
+* [PvPTime Plugin (Sponge Ore)](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
 
 ## Building
 To compile everything, run `gradle build`
