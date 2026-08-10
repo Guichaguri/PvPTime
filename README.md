@@ -5,11 +5,11 @@ PvPTime for Fabric, NeoForge, Forge, Sponge, Paper, Spigot and Bukkit
 * [API](https://github.com/Guichaguri/PvPTime/wiki/API)
 
 ## Downloads
-* [PvPTime (Modrinth)](https://modrinth.com/plugin/pvptime) (Fabric/NeoForge/Forge/Sponge/Bukkit/Spigot/Paper/etc)
-* [PvPTime Mod (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/pvptime) (Fabric/NeoForge/Forge)
-* [PvPTime Plugin (CurseForge)](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Bukkit/Spigot/Paper/Folia/Purpur)
-* [PvPTime Plugin (Hangar)](https://hangar.papermc.io/Guichaguri/PvPTime) (Bukkit/Spigot/Paper/Folia/Purpur)
-* [PvPTime Plugin (Sponge Ore)](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
+* [Modrinth](https://modrinth.com/plugin/pvptime) (Fabric/NeoForge/Forge/Sponge/Bukkit/Spigot/Paper/etc)
+* [CurseForge (Mod)](https://www.curseforge.com/minecraft/mc-mods/pvptime) (Fabric/NeoForge/Forge)
+* [CurseForge (Plugin)](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Bukkit/Spigot/Paper/Folia/Purpur)
+* [Hangar](https://hangar.papermc.io/Guichaguri/PvPTime) (Bukkit/Spigot/Paper/Folia/Purpur)
+* [Sponge Ore](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
 
 ## Building
 To compile everything, run `gradle build`
