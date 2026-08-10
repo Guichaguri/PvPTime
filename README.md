@@ -8,6 +8,7 @@ PvPTime for Fabric, NeoForge, Forge, Sponge, Paper, Spigot and Bukkit
 * [PvPTime (Modrinth)](https://modrinth.com/plugin/pvptime) (Fabric/NeoForge/Forge/Sponge/Bukkit/Spigot/Paper/etc)
 * [PvPTime Mod (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/pvptime) (Fabric/NeoForge/Forge)
 * [PvPTime Plugin (CurseForge)](https://www.curseforge.com/minecraft/bukkit-plugins/pvptime) (Bukkit/Spigot/Paper/Folia/Purpur)
+* [PvPTime Plugin (Hangar)](https://hangar.papermc.io/Guichaguri/PvPTime) (Bukkit/Spigot/Paper/Folia/Purpur)
 * [PvPTime Plugin (Sponge Ore)](https://ore.spongepowered.org/Guichaguri/PvPTime) (SpongeVanilla/SpongeForge/SpongeNeo)
 
 ## Building
